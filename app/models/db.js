@@ -42,7 +42,7 @@ db.user = require('./user')(sequelize, Sequelize);
 
 //Relations
 db.user.hasMany(db.user_account,{foreignKey: 'user_id' });
-//db.user_account.belongsTo(db.user);
+//db.user_account.belongsTo(db.user,{foreignKey: 'id'});
 db.account_type.hasMany(db.user_account,{foreignKey: 'account_type_id' });
 //db.user_account.belongsTo(db.account_type);
 db.user_account.hasMany(db.account_page,{foreignKey: 'user_account_id' });

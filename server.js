@@ -14,7 +14,7 @@ const tone_analyzer = new watson_tone.ToneAnalyzer();
 const watson_language = require('./app/services/language_analyzer');
 const language_analyzer = new watson_language.LanguageAnalyzer();
 const twitter = require('./app/services/twitter')
-const twitter_service = new twitter.TwitterService();
+//const twitter_service = new twitter.TwitterService();
 
 //import routes
 const user_routes = require('./app/routes/user');
@@ -33,33 +33,22 @@ app.use('/api/v1',router);
 router.use('/user',user_routes);
 router.use('/auth',auth_routes);
 
-var sample_text = 'Jet Blue is always late and their cutomer service sucks';
+//add catch all route to clean up any rogue requests
+/*app.all('*',(req,res)=>{
+    res.json({message:'404 route not found'});
+});*/
 
-/*var router = require('./app/routes')(app);
-app.get('*', (req, res) => res.status(200).send({
-  message: 'Welcome to the beginning of nothingness.',
-}));*/
+let sample_text = 'Jet Blue is always late and their cutomer service sucks';
 
-/*
-app.get('/api/tweets',(req,res)=>{
-    let tweet_array = [];
-    let today = new Date();
-    let dd = today.getDate();
-    let mm = today.getMonth() + 1; //January is 0
-    let yyyy = today.getFullYear();
-    today = yyyy + '-'+ mm + '-' + dd;
-    twitter_service.params.q = `(@walmart since:${today} OR #walmart since:${today} OR walmart since:${today}) 
-                                 AND (source:"Twitter for Android" OR source:"Twitter for iPhone" OR source:tweetdeck OR source:web)
-                                 AND (-filter:retweets) AND (-filter:replies)`;
-    
-    new Promise((resolve,reject)=>{
-        twitter_service.get_tweets(resolve,reject);
-    })
+app.get('/api/tweets',(req,res)=>{    
+    //new Promise((resolve,reject)=>{
+    twitter.get_tweets()
+    //})
     .then((array)=>{
         return language_analyzer.load_text(array);
     })
     .then((batch_text)=>{
-      var tone_elements = Promise.all(batch_text.map((text) => 
+      let tone_elements = Promise.all(batch_text.map((text) => 
                                         {return language_analyzer.analyze_text(text);}));
       return tone_elements;
     })
@@ -70,7 +59,7 @@ app.get('/api/tweets',(req,res)=>{
         console.log(error);
     })
 });
-
+/*
 app.post('/api/language_analyzer',(req,res)=>{
     language_analyzer.params.text = sample_text;
     language_analyzer.analyzer.analyze(language_analyzer.params, function(error, response) {

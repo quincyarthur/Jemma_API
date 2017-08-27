@@ -9,7 +9,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       description: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('Twitter','Facebook','Instagram','Youtube'),
         allowNull: false
       },
       created_at: {
