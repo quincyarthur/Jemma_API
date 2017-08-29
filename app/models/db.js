@@ -25,7 +25,6 @@ db.account_page = require('./account_page')(sequelize, Sequelize);
 db.account_type = require('./account_type')(sequelize, Sequelize);
 db.group = require('./group')(sequelize, Sequelize);
 db.mention_tone = require('./mention_tone')(sequelize, Sequelize);
-db.page_group = require('./page_group')(sequelize, Sequelize);
 db.page_tone = require('./page_tone')(sequelize, Sequelize);
 db.plan = require('./plan')(sequelize, Sequelize);
 db.post_tone = require('./post_tone')(sequelize, Sequelize);
@@ -41,22 +40,26 @@ db.user = require('./user')(sequelize, Sequelize);
 
 
 //Relations
-db.user.hasMany(db.user_account,{foreignKey: 'user_id' });
+//db.user.hasMany(db.user_account,{foreignKey: 'user_id' });
 //db.user_account.belongsTo(db.user,{foreignKey: 'id'});
-db.account_type.hasMany(db.user_account,{foreignKey: 'account_type_id' });
+//db.account_type.hasMany(db.user_account,{foreignKey: 'account_type_id' });
 //db.user_account.belongsTo(db.account_type);
-db.user_account.hasMany(db.account_page,{foreignKey: 'user_account_id' });
+db.user.belongsToMany(db.account_type, {through: db.user_account,foreignKey: 'user_id' })
+db.account_type.belongsToMany(db.user, {through: db.user_account,foreignKey: 'account_type_id'})
+//db.user_account.hasMany(db.account_page,{foreignKey: 'user_account_id' });
 //db.account_page.belongsTo(db.user_account);
-db.page.hasMany(db.account_page,{foreignKey: 'page_id' });
+//db.page.hasMany(db.account_page,{foreignKey: 'page_id' });
 //db.account_page.belongsTo(db.page);
-db.page.hasOne(db.group,{foreignKey: 'group_id' });
-//db.group.belongsTo(db.page);
+db.user_account.belongsToMany(db.page, {through: db.account_page,foreignKey: 'user_account_id' })
+db.page.belongsToMany(db.user_account, {through: db.account_page,foreignKey: 'page_id'})
+db.group.hasOne(db.page,{foreignKey: 'group_id' });
+//db.page.belongsTo(db.group);
 db.user.hasMany(db.preference,{foreignKey: 'user_id' });
 //db.preference.belongsTo(db.user);
 db.preference_type.hasMany(db.preference_value,{foreignKey: 'preference_type_id' });
 //db.preference_value.belongsTo(db.preference_type);
 db.user.hasOne(db.subscription,{foreignKey: 'user_id' });
-//db.subscription.belongsTo(db.user);
+db.subscription.belongsTo(db.user);
 db.plan.hasMany(db.subscription,{foreignKey: 'plan_id' });
 //db.subscription.belongsTo(db.plan);
 db.user.hasMany(db.purchase_history,{foreignKey: 'user_id' });

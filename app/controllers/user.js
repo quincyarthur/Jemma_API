@@ -4,44 +4,57 @@ const mail_queue = require('../mailer/send');
 const twitter =  require('../services/twitter')
 
 function addTwitterAccounts(req,res){
+    /*
+    Parameters:
+    token_key,token_secret,group_id
+    */
     twitter.verifyCredentials(req.body.token_key,req.body.token_secret)
     .then((user_account_info)=>{
-        return Promise.all(
+        return Promise.all([
            models.user_account.find({
                 where:{user_id:req.user.id,account_id:user_account_info.id_str}
             }),
-           models.account_type.findOne({where:{description:'Twitter'}})
-        );
+           Promise.resolve(models.account_type.findOne({where:{description:'Twitter'}})),
+           Promise.resolve(user_account_info.id_str)
+        ]);
     })
     .then((user_account)=>{
-        if (!user_account){
-            res.json('empty')
+        if(!user_account[0]){
+            return Promise.all([
+                Promise.resolve(req.user.addAccount_Type(user_account[1], 
+                    {through:{token_key:req.body.token_key,
+                              token_secret:req.body.token_secret,
+                              account_id:user_account[2]
+                             }
+                    }
+                )),
+                models.page.findOrCreate({
+                    where:{managed_page_id:user_account[2]},
+                    defaults:{
+                        group_id: req.body.group_id,
+                        managed_page_id:user_account[2],
+                        keywords: JSON.stringify(req.body.keywords) || JSON.stringify([''])
+                    }
+                })
+                .spread((page,created)=>{
+                    return Promise.resolve(page);
+                })
+            ]);     
         }
         else{
-            res.json('not')
+            return res.status(400).json({message:'Twitter account already tied to user'});
         }
-        //res.json(user_account);
-        /*if(!user_account){
-            return req.user.createUserAccount({
-                account_id:user_account_info.id_str,
-                token_key:req.body.token_key,
-                token_secret:req.body.token_secrey
-                //account_type_id: 
-            });
-        }*/
+    })
+    .then((results)=>{
+        return results[0][0][0].addPage(results[1]);
+    })
+    .then((account_page)=>{
+        res.status(200).json({message:'Twitter Account successfully added'})
     })
    .catch((error)=>{
+       console.log(error)
         res.status(400).json({message:error});
    });
-    /*models.user.findById(req.params.id)
-    .then((user)=>{
-        user.createUserAccount({
-            account_id: req.body.account_id,
-            account_type_id: req.body.account_type_id,
-            access_key: req.body.access_token,
-            access_secret: req.body.access_secret
-        })
-    })*/
 }
 
 function create(req,res){

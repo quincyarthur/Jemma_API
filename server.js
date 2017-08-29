@@ -19,6 +19,7 @@ const twitter = require('./app/services/twitter')
 //import routes
 const user_routes = require('./app/routes/user');
 const auth_routes = require('./app/routes/auth');
+const group_routes = require('./app/routes/group');
 
 //import models
 const models = require('./app/models/db');
@@ -32,6 +33,7 @@ app.use(morgan('dev'));
 app.use('/api/v1',router);
 router.use('/user',user_routes);
 router.use('/auth',auth_routes);
+router.use('/group',group_routes);
 
 //add catch all route to clean up any rogue requests
 /*app.all('*',(req,res)=>{
