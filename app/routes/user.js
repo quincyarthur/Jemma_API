@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/user');
+const TwitterController = require('../controllers/twitter');
 const passport = require('../services/passport')();
 
 router.route('/').post(UserController.create);
-router.route('/accounts/Twitter').post(passport.authenticate(),UserController.addTwitterAccounts);
+router.route('/accounts/Twitter').post(passport.authenticate(),TwitterController.addAccount);
+router.route('/twitter/profile').get(passport.authenticate(),TwitterController.getProfile);
 
 router.route('/:id')
       .get(UserController.find)

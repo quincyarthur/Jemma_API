@@ -69,11 +69,13 @@ function verifyCredentials(access_token_key,access_token_secret) {
     });
 }
 
-function getUserProfileInfo(user_id){
-    let path = 'users/lookup'
-    let params = {user_id:user_id}
+function getUserProfileInfo(user_id,token_key,token_secret){
+    client.access_token_key = token_key;
+    client.access_token_secret = token_secret;
+    let path = 'users/lookup';
+    let params = {user_id:user_id};
     return new Promise((resolve,reject)=>{
-        this.client.get(path,params)
+        client.get(path,params)
         .then((user_account_info)=>{
             resolve(user_account_info);
         })
