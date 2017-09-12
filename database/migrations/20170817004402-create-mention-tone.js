@@ -8,8 +8,12 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      tone_id: {
+      page_id: {
         type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      keyword: {
+        type: Sequelize.STRING,
         allowNull: false
       },
       last_post_id: {

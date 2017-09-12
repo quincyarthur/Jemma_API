@@ -17,12 +17,13 @@ module.exports = function() {
     .then((user)=>{
         if (!user){
           return done(null,false)
-        }else{
+        }
+        else{
           return done(null,user)
         }
     })
     .catch((error)=>{
-        return done(err, false);
+        return done(error, false);
     });
   }));
 

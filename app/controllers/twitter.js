@@ -1,46 +1,51 @@
-const twitter =  require('../services/twitter');
+const twitter_service =  require('../services/twitter');
+const twitter = new twitter_service.Twitter();
 const models = require('../models/db');
-const watson_language = require('../services/language_analyzer');
-const language_analyzer = new watson_language.LanguageAnalyzer();
 
 function getProfile(req,res){
+    /*returns array in the event user has multiple twitter accounts */
     req.user.getAccount_Types({where:{description:'Twitter'}})
     .then((profile_info)=>{
-        let profiles = Promise.all(profile_info.map((account)=>{
-                                return twitter.getUserProfileInfo(account.User_Account.account_id,account.User_Account.token_key,account.User_Account.token_secret);
-                       }));
-        return profiles;
+        if (profile_info.length === 0){
+            return Promise.reject('No Twitter accounts found for user');
+        }
+        else{
+            let profiles = Promise.all(profile_info.map((account)=>{
+                                       return twitter.getUserProfileInfo(account.User_Account.account_id,
+                                                                         account.User_Account.token_key,account.User_Account.token_secret);
+                                      }));
+            return profiles;
+        }
     })
     .then((profile)=>{
-        console.log(profile);
-        let profile_details = profile[0].map((profile)=>{JSON.stringify({profile_id:profile.id,handle:profile.screen_name,
+        let profile_details = profile[0].map((profile)=>{return {profile_id:profile.id,handle:profile.screen_name,
                                                       num_tweets:profile.statuses_count,followers:profile.followers_count,
                                                       profile_image:profile.profile_image_url}
-                                                      )});
-        res.status(200).json(JSON.stringify(profile_details));
+                                                      });
+        res.status(200).json(profile_details);
     })
     .catch((error)=>{
-        console.log(error);
         res.status(400).json({message:error});
-    })
+    });
 }
 
 function getAudienceTone(req,res){
-        twitter.get_tweets()
-        .then((array)=>{
-            return language_analyzer.load_text(array);
-        })
-        .then((batch_text)=>{
-            let tone_elements = Promise.all(batch_text.map((text) => 
-                                            {return language_analyzer.analyze_text(text);}));
-            return tone_elements;
-        })
-        .then((tone_elements)=>{
-            res.status(200).json(tone_elements);
-        })
-        .catch((error)=>{
-            res.status(400).json({message:error});
-        });
+    /*Params: Profile_id*/
+    models.user_account.findOne({where:{account_id:req.query.profile_id},
+                                 include:[{model:models.account_type,where:{description:'Twitter'}}
+                                       ]
+                               })
+    .then((profile)=>{
+        if (!profile){
+            return Promise.reject('Not a valid Twitter Account');
+        }else{
+            //go to db and search all tone records and get averages per category
+            res.send("Add Functionality to retrieve averages from db");
+        }
+    })
+    .catch((error)=>{
+        res.status(400).json({message:error});
+    });
 }
 
 function addAccount(req,res){
@@ -54,20 +59,20 @@ function addAccount(req,res){
            models.user_account.find({
                 where:{user_id:req.user.id,account_id:user_account_info.id_str}
             }),
-           Promise.resolve(models.account_type.findOne({where:{description:'Twitter'}})),
+           models.account_type.findOne({where:{description:'Twitter'}}),
            Promise.resolve(user_account_info.id_str)
         ]);
     })
     .then((user_account)=>{
         if(!user_account[0]){
             return Promise.all([
-                Promise.resolve(req.user.addAccount_Type(user_account[1], 
+                req.user.addAccount_Type(user_account[1], 
                     {through:{token_key:req.body.token_key,
                               token_secret:req.body.token_secret,
                               account_id:user_account[2]
                              }
                     }
-                )),
+                ),
                 models.page.findOrCreate({
                     where:{managed_page_id:user_account[2]},
                     defaults:{
@@ -86,6 +91,7 @@ function addAccount(req,res){
         }
     })
     .then((results)=>{
+        console.log(results)
         return results[0][0][0].addPage(results[1]);
     })
     .then((account_page)=>{

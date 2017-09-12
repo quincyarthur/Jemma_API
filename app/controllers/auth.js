@@ -25,6 +25,9 @@ function authLocal(req,res){
         if(!user){
            res.status(400).json({'message':'email not found'});
         }
+        else if(!user.confirmed){
+            res.status(400).json({message:'User has not yet verified account'});
+        }
         else{
             bcrypt.compare(req.body.password,user.password,(error,isMatch)=>{
              if (error || !isMatch){

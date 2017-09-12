@@ -1,7 +1,8 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
   var mention_tone = sequelize.define('Mention_Tone', {
-    tone_id: DataTypes.INTEGER,
+    page_id: DataTypes.INTEGER,
+    keyword: DataTypes.STRING,
     last_post_id: DataTypes.STRING,
     tone_score: DataTypes.FLOAT
   }, {

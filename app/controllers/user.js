@@ -1,28 +1,35 @@
 const models = require('../models/db');
-const mail_queue = require('../mailer/send');
+//const mail_queue = require('../mailer/send');
+const mail_queue = require('../mailer/send_kue');
 
 function create(req,res){
-    models.user.find(
-        {where:{email:req.body.email}}
-    )
+     models.user.find({where:{email:req.body.email}})
     .then((user) => {
         if (user){
           return res.status(400).json({'message':'user already exists'});            
         }
         else{
-          return models.user.create({
-               first_name:req.body.first_name.toString().toLowerCase(),
-               last_name:req.body.last_name.toString().toLowerCase(),
-               email:req.body.email.toString().toLowerCase(),
-               password:req.body.password
-          })
+            return Promise.all([
+                models.user.create({
+                    first_name:req.body.first_name.toString().toLowerCase(),
+                    last_name:req.body.last_name.toString().toLowerCase(),
+                    email:req.body.email.toString().toLowerCase(),
+                    password:req.body.password
+                }),
+                models.plan.findOne({where:{plan_name:'30 Day Free Trail'}}) 
+            ])
         }
     })
     .then((user) => {
-          mail_queue.send_to_queue(user);
-          res.status(201).json(user);
+        //mail_queue.send_to_queue(user[0]);
+        mail_queue.sendToQueue(user[0]);
+        return user[0].setPlans(user[1],{through:{active: true}});      
+    })
+    .then((subscribed_user)=>{
+        res.status(201).json({message:'User successfully created'});
     })
     .catch((error) => {
+        console.log(error)
         res.status(400).json(error);
     });  
 }

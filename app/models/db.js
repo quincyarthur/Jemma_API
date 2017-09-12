@@ -7,7 +7,7 @@ const sequelize =
                   {  
                     host: process.env.DATABASE_HOST,
                     port: process.env.DATABASE_PORT,
-                    dialect: process.env.DATABASE_DIALECT,
+                    dialect:process.env.DATABASE_DIALECT,
                     define: {
                         underscored: true
                     }
@@ -42,26 +42,24 @@ db.user = require('./user')(sequelize, Sequelize);
 //Relations
 //db.user.hasMany(db.user_account,{foreignKey: 'user_id' });
 //db.user_account.belongsTo(db.user,{foreignKey: 'id'});
-//db.account_type.hasMany(db.user_account,{foreignKey: 'account_type_id' });
-//db.user_account.belongsTo(db.account_type);
+db.account_type.hasMany(db.user_account,{foreignKey: 'account_type_id' });
+db.user_account.belongsTo(db.account_type,{foreignKey: 'account_type_id' });
 db.user.belongsToMany(db.account_type, {through: db.user_account,foreignKey: 'user_id' })
 db.account_type.belongsToMany(db.user, {through: db.user_account,foreignKey: 'account_type_id'})
 //db.user_account.hasMany(db.account_page,{foreignKey: 'user_account_id' });
 //db.account_page.belongsTo(db.user_account);
 //db.page.hasMany(db.account_page,{foreignKey: 'page_id' });
 //db.account_page.belongsTo(db.page);
-db.user_account.belongsToMany(db.page, {through: db.account_page,foreignKey: 'user_account_id' })
-db.page.belongsToMany(db.user_account, {through: db.account_page,foreignKey: 'page_id'})
+db.user_account.belongsToMany(db.page, {through: db.account_page,foreignKey: 'user_account_id' });
+db.page.belongsToMany(db.user_account, {through: db.account_page,foreignKey: 'page_id'});
 db.group.hasOne(db.page,{foreignKey: 'group_id' });
 //db.page.belongsTo(db.group);
 db.user.hasMany(db.preference,{foreignKey: 'user_id' });
 //db.preference.belongsTo(db.user);
 db.preference_type.hasMany(db.preference_value,{foreignKey: 'preference_type_id' });
 //db.preference_value.belongsTo(db.preference_type);
-db.user.hasOne(db.subscription,{foreignKey: 'user_id' });
-db.subscription.belongsTo(db.user);
-db.plan.hasMany(db.subscription,{foreignKey: 'plan_id' });
-//db.subscription.belongsTo(db.plan);
+db.user.belongsToMany(db.plan, {through: db.subscription,foreignKey: 'user_id' });
+db.plan.belongsToMany(db.user, {through: db.subscription,foreignKey: 'plan_id'});
 db.user.hasMany(db.purchase_history,{foreignKey: 'user_id' });
 //db.purchase_history.belongsTo(db.user);
 db.subscription.hasMany(db.purchase_history,{foreignKey: 'subscription_id' });
@@ -74,7 +72,7 @@ db.page.hasMany(db.post_tone,{foreignKey: 'page_id' });
 //db.post_tone.belongsTo(db.page);
 db.tone.hasMany(db.post_tone,{foreignKey: 'tone_id' });
 //db.post_tone.belongsTo(db.tone);
-db.tone.hasMany(db.mention_tone,{foreignKey: 'tone_id' });
-//db.mention_tone.belongsTo(db.tone);
+db.page.hasMany(db.mention_tone,{foreignKey: 'page_id' });
+//db.mention_tone.belongsTo(db.mention_tone);
 
 module.exports = db;  
