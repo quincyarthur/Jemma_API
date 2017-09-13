@@ -11,16 +11,17 @@ models.user.findAll({include:[{model:models.plan,where:{plan_name:'30 Day Free T
 .then((users)=>{
     let accounts = users.map((user)=>{
         return user.Account_Types;
-    })
-    return accounts;
+    })   
+    let flattened = [].concat.apply([],accounts);
+    return flattened;
 })
 .then((accounts)=>{
-    accounts[0].map((account)=>{
+    for (let x = 0; x < accounts.length; x++){
+        console.log(`lets see with multiple users ${JSON.stringify(accounts[x].User_Account.user_id)}`)
         let twitter = new twitter_service.Twitter();
-        twitter.getUserProfileInfo(account.User_Account.account_id,account.User_Account.token_key,account.User_Account.token_secret)
+        twitter.getUserProfileInfo(accounts[x].User_Account.account_id,accounts[x].User_Account.token_key,accounts[x].User_Account.token_secret)
         .then((handles)=>{
-            console.log(`Handle: ${handles[0].screen_name}, Profile Name: ${handles[0].name}`);
-            //return twitter.get_tweets(handles[0].screen_name,handles[0].name)
+            //return new Promise((resolve,reject) =>{twitter.get_tweets(resolve,reject,'',handles[0].screen_name,handles[0].name)});
             return new Promise((resolve,reject) =>{twitter.get_tweets(resolve,reject,'','@walmart','walmart')}); //testing on
         })
         .then((results)=>{
@@ -31,17 +32,13 @@ models.user.findAll({include:[{model:models.plan,where:{plan_name:'30 Day Free T
                 return tone_elements;
             })
             .then((tone_elements)=>{
-                for(let x = 0; x < tone_elements[0].sentiment.targets.length; x++){
-                    account.getUser_Accounts()
-                    .then((user_account)=>{
-                            console.log(user_account[0])
-                            return user_account[0].getPages()
-                    })
+                for(let i = 0; i < tone_elements[0].sentiment.targets.length; i++){
+                    accounts[x].User_Account.getPages()
                     .then((pages)=>{
-                        console.log(results.max_id)
-                        return pages[0].createMention_Tone({keyword:tone_elements[0].sentiment.targets[x].text,
+                        //Twitter accounts only have one page will be different for other social media
+                        return pages[0].createMention_Tone({keyword:tone_elements[0].sentiment.targets[i].text,
                             last_post_id: results.max_id,
-                            tone_score:tone_elements[0].sentiment.targets[x].score
+                            tone_score:tone_elements[0].sentiment.targets[i].score
                             });
                     })
                     .then((success)=>{
@@ -51,7 +48,6 @@ models.user.findAll({include:[{model:models.plan,where:{plan_name:'30 Day Free T
                         console.log(error);
                     })
                 }
-                console.log(JSON.stringify(tone_elements,null,2));
             })
             .catch((error)=>{
                 console.log(error);
@@ -60,7 +56,7 @@ models.user.findAll({include:[{model:models.plan,where:{plan_name:'30 Day Free T
         .catch((error)=>{
             console.log(error);
         });
-    })
+    }
 })
 .catch((error)=>{
     console.log(error);

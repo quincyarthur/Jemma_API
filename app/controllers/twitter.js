@@ -91,8 +91,8 @@ function addAccount(req,res){
         }
     })
     .then((results)=>{
-        console.log(results)
-        return results[0][0][0].addPage(results[1]);
+        let flattened = [].concat.apply([],results);
+        return flattened[0][0].addPage(results[1]);
     })
     .then((account_page)=>{
         res.status(200).json({message:'Twitter Account successfully added'})
