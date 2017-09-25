@@ -17,8 +17,9 @@ module.exports = {
         allowNull: false
       },
       keywords: {
-        type: Sequelize.JSON,
-        allowNull: false
+        type: Sequelize.ARRAY(Sequelize.TEXT),
+        allowNull: false,
+        defaultValue: []
       },
       created_at: {
         allowNull: false,

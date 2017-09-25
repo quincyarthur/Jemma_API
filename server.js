@@ -21,6 +21,7 @@ const kue = require('kue');
 const user_routes = require('./app/routes/user');
 const auth_routes = require('./app/routes/auth');
 const group_routes = require('./app/routes/group');
+const page_routes = require('./app/routes/page');
 
 //import models
 const models = require('./app/models/db');
@@ -38,11 +39,12 @@ app.use('/api/v1',router);
 router.use('/user',user_routes);
 router.use('/auth',auth_routes);
 router.use('/group',group_routes);
+router.use('/page',page_routes);
 
 //add catch all route to clean up any rogue requests
-/*app.all('*',(req,res)=>{
+app.all('*',(req,res)=>{
     res.json({message:'404 route not found'});
-});*/
+});
 
 let sample_text = 'Jet Blue is always late and their cutomer service sucks';
 

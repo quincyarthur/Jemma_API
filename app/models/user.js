@@ -1,5 +1,6 @@
 'use strict';
 const bcrypt = require('bcrypt-nodejs');
+const models = require('../models/db');
 
 module.exports = function(sequelize, DataTypes) {
   var User = sequelize.define('User', 
@@ -15,7 +16,11 @@ module.exports = function(sequelize, DataTypes) {
                        allowNull: false
                 }
     },
-    {
+    {scopes:{
+      confirmed:{
+        where:{confirmed: true}
+      }
+    }
   });
 
   User.beforeCreate((user, options)=> {

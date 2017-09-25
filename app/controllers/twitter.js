@@ -31,19 +31,49 @@ function getProfile(req,res){
 
 function getAudienceTone(req,res){
     /*Params: Profile_id*/
-    models.user_account.findOne({where:{account_id:req.query.profile_id},
-                                 include:[{model:models.account_type,where:{description:'Twitter'}}
-                                       ]
-                               })
-    .then((profile)=>{
-        if (!profile){
-            return Promise.reject('Not a valid Twitter Account');
-        }else{
-            //go to db and search all tone records and get averages per category
-            res.send("Add Functionality to retrieve averages from db");
+    req.user.getAccount_Types({description:'Twitter'})
+    .then((user_accounts)=>{
+        let account_pages = Promise.all(user_accounts.map((user)=>{
+            return new Promise((resolve,reject)=>{
+                user.User_Account.getPages()
+                .then((account_page)=>{
+                    let arr_page = [];
+                    for(x = 0; x < account_page.length;x++){
+                        arr_page.push({ id:account_page[x].id,
+                                        page_id:account_page[x].managed_page_id,
+                                        keywords:account_page[x].keywords
+                                         });
+                    }              
+                    resolve(arr_page);
+                })
+                .catch((error)=>{
+                    reject(error);
+                })
+            })
+        }));
+
+        return account_pages;
+    })
+    .then((account_pages)=>{
+        let flattened = [].concat.apply([], account_pages);
+        if(flattened.includes(req.query.profile_id)){
+           return Promise.reject('User does not have access to this page');
+        }
+        else{
+            let page = flattened.filter((account_page)=>{
+                return account_page.page_id = req.query.profile_id;
+            })
+            console.log(page[0].keywords.toString())
+            return models.sequelize.query('SELECT keyword,AVG(tone_score) FROM "Mention_Tones" where page_id = :page_id  and keyword in (:keyword) GROUP BY keyword',
+                                  {replacements:{page_id:page[0].id,keyword:'service'/*page[0].keywords.toString()*/},
+                                  type: models.sequelize.QueryTypes.SELECT})
         }
     })
+    .then((tones)=>{
+        res.json(tones);
+    })
     .catch((error)=>{
+        console.log(error)
         res.status(400).json({message:error});
     });
 }
@@ -65,7 +95,7 @@ function addAccount(req,res){
     })
     .then((user_account)=>{
         if(!user_account[0]){
-            return Promise.all([
+           return Promise.all([
                 req.user.addAccount_Type(user_account[1], 
                     {through:{token_key:req.body.token_key,
                               token_secret:req.body.token_secret,
@@ -76,15 +106,15 @@ function addAccount(req,res){
                 models.page.findOrCreate({
                     where:{managed_page_id:user_account[2]},
                     defaults:{
-                        group_id: req.body.group_id,
+                        group_id: req.params.id,//req.body.group_id,
                         managed_page_id:user_account[2],
-                        keywords: JSON.stringify(req.body.keywords) || JSON.stringify([''])
+                        keywords: req.body.keywords || []
                     }
                 })
                 .spread((page,created)=>{
                     return Promise.resolve(page);
                 })
-            ]);     
+            ]); 
         }
         else{
             return res.status(400).json({message:'Twitter account already tied to user'});
