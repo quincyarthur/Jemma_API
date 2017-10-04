@@ -1,17 +1,17 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
-  var mention_tone = sequelize.define('Mention_Tone', {
+  var keyword_sentiment = sequelize.define('Keyword_Sentiment', {
     page_id: DataTypes.INTEGER,
-    tone: DataTypes.STRING,
+    keyword: DataTypes.STRING,
     last_post_id: DataTypes.STRING,
-    post: { type : DataTypes.ARRAY(DataTypes.TEXT), defaultValue: null}
+    tone_score: DataTypes.FLOAT
   }, {
     classMethods: {
       associate: function(models) {
         // associations can be defined here
-      },
-      underscored: true
-    }
+      }
+    },
+     underscored: true
   });
-  return mention_tone;
+  return keyword_sentiment;
 };

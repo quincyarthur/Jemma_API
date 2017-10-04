@@ -25,6 +25,7 @@ db.account_page = require('./account_page')(sequelize, Sequelize);
 db.account_type = require('./account_type')(sequelize, Sequelize);
 db.group = require('./group')(sequelize, Sequelize);
 db.mention_tone = require('./mention_tone')(sequelize, Sequelize);
+db.keyword_sentiment = require('./keyword_sentiment')(sequelize, Sequelize);
 db.page_tone = require('./page_tone')(sequelize, Sequelize);
 db.plan = require('./plan')(sequelize, Sequelize);
 db.post_tone = require('./post_tone')(sequelize, Sequelize);
@@ -72,6 +73,7 @@ db.page.hasMany(db.post_tone,{foreignKey: 'page_id' });
 //db.post_tone.belongsTo(db.page);
 db.tone.hasMany(db.post_tone,{foreignKey: 'tone_id' });
 //db.post_tone.belongsTo(db.tone);
+db.page.hasMany(db.keyword_sentiment,{foreignKey: 'page_id' });
 db.page.hasMany(db.mention_tone,{foreignKey: 'page_id' });
 //db.mention_tone.belongsTo(db.mention_tone);
 

@@ -13,8 +13,8 @@ class Twitter {
         this.max_id_str = '';
         this.tweet_array = [];
         this.get_tweets =  (resolve,reject,max_id,handle,name) => {
-            //account for looping handle and name
-            // add functionality where the orginal max_str_id is saved in db so future searches know where to stop
+            //account for looping handle and name (done)
+            // add functionality where the orginal max_str_id is saved in db so future searches know where to stop (done)
             let path = 'search/tweets';
             let params = {
                 q:'',
@@ -54,7 +54,7 @@ class Twitter {
                         }
                         else{
                             params.since_id_str = tweets.search_metadata.max_id_str
-                            this.get_tweets(resolve,params.since_id_str,handle,name); //recursive implementation
+                            this.get_tweets(resolve,reject,params.since_id_str,handle,name); //recursive implementation
                         }
                     })
                     .catch((error)=>{

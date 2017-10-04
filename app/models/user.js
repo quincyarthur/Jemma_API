@@ -14,7 +14,8 @@ module.exports = function(sequelize, DataTypes) {
       confirmed:{type: DataTypes.BOOLEAN,
                        defaultValue: false,
                        allowNull: false
-                }
+                },
+      lasted_updated: DataTypes.DATE
     },
     {scopes:{
       confirmed:{

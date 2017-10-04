@@ -1,6 +1,5 @@
 const models = require('../models/db');
-//const mail_queue = require('../mailer/send');
-const mail_queue = require('../mailer/send_kue');
+const mail_queue = require('../background_jobs/send_kue');
 
 function create(req,res){
      models.user.find({where:{email:req.body.email}})
@@ -22,7 +21,7 @@ function create(req,res){
     })
     .then((user) => {
         //mail_queue.send_to_queue(user[0]);
-        mail_queue.sendToQueue(user[0]);
+        mail_queue.sendMailToQueue(user[0]);
         return user[0].setPlans(user[1],{through:{active: true}});      
     })
     .then((subscribed_user)=>{

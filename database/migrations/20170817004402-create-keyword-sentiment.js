@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('Mention_Tones', {
+    return queryInterface.createTable('Keyword_Sentiments', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -35,6 +35,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('Mention_Tones');
+    return queryInterface.dropTable('Keyword_Sentiments');
   }
 };
