@@ -1,7 +1,7 @@
 'use strict';
 module.exports = function(sequelize, DataTypes) {
   var Account_Type = sequelize.define('Account_Type', {
-    description: DataTypes.STRING
+    description: DataTypes.ENUM('Twitter','Facebook','Instagram','Youtube')
   }, {
     /*classMethods: {
       associate: function(models) {

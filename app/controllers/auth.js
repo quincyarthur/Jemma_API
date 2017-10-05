@@ -25,13 +25,16 @@ function authLocal(req,res){
         if(!user){
            res.status(400).json({'message':'email not found'});
         }
+        else if(!user.confirmed){
+            res.status(400).json({message:'User has not yet verified account'});
+        }
         else{
             bcrypt.compare(req.body.password,user.password,(error,isMatch)=>{
              if (error || !isMatch){
                  res.status(400).json({'message':'Incorrect Password'});
              }
              else if(isMatch){
-                let token = jwt.sign({data:user.id},process.env.JWT_SECRET,
+                let token = jwt.sign({user:{id:user.id,confirmed:user.confirmed}},process.env.JWT_SECRET,
                                      {expiresIn: "2 days"});
                 res.status(200).json({user:user,jwtToken:`JWT ${token}`});
              }

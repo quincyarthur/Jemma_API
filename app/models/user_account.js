@@ -4,6 +4,8 @@ module.exports = function(sequelize, DataTypes) {
   {
     user_id: DataTypes.INTEGER,
     account_id: DataTypes.INTEGER,
+    token_key: DataTypes.STRING,
+    token_secret: DataTypes.STRING,
     account_type_id: DataTypes.INTEGER
   }, 
   {

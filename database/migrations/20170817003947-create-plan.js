@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = {
   up: function(queryInterface, Sequelize) {
     return queryInterface.createTable('Plans', {
@@ -14,6 +15,22 @@ module.exports = {
       },
       price: {
         type: Sequelize.FLOAT,
+        allowNull: false
+      },
+      num_accounts: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      num_keywords: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      account_update_interval: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      competitor_analysis: {
+        type: Sequelize.BOOLEAN,
         allowNull: false
       },
       created_at: {

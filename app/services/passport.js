@@ -12,17 +12,18 @@ module.exports = function() {
   };
 
   passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
-    const jwt_user_id = jwt_payload.data;
+    const jwt_user_id = jwt_payload.user.id;
     models.user.findById(jwt_user_id)
     .then((user)=>{
         if (!user){
           return done(null,false)
-        }else{
+        }
+        else{
           return done(null,user)
         }
     })
     .catch((error)=>{
-        return done(err, false);
+        return done(error, false);
     });
   }));
 

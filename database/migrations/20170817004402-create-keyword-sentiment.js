@@ -1,15 +1,19 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('Mention_Tones', {
+    return queryInterface.createTable('Keyword_Sentiments', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      tone_id: {
+      page_id: {
         type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      keyword: {
+        type: Sequelize.STRING,
         allowNull: false
       },
       last_post_id: {
@@ -31,6 +35,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('Mention_Tones');
+    return queryInterface.dropTable('Keyword_Sentiments');
   }
 };
