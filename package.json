@@ -1,11 +1,15 @@
 {
   "name": "jemma-api",
   "version": "1.0.0",
+  "engines": {
+    "node": "6.11.2"
+  },
   "description": "customer based sentiment analysis",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon server.js"
+    "start": "node server.js"
+    //"start": "nodemon server.js"
   },
   "author": "",
   "license": "ISC",

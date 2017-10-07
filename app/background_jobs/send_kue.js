@@ -1,6 +1,6 @@
 require('dotenv').config();
 const kue = require('kue');
-const queue = kue.createQueue();
+const queue = kue.createQueue({redis:process.env.REDIS_URL});
 
 function sendMailToQueue(userDetails){
     let link = `${process.env.HOST}/api/v1/auth/verify/?id=${userDetails.id}`;

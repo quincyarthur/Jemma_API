@@ -1,6 +1,6 @@
 require('dotenv').config({path: '../../.env'});
 const kue = require('kue');
-const queue = kue.createQueue();
+const queue = kue.createQueue({redis:process.env.REDIS_URL});
 const twitter_tones = require('../background_jobs/analyze_tweets');
 const models = require('../../app/models/db');
 

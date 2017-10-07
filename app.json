@@ -1,0 +1,9 @@
+{
+    "name": "Jemma_API",
+    "description": "REST API for Jemma AI",
+    "repository": "https://git.heroku.com/jemma-api.git",
+    "scripts": {
+      "postdeploy": ""
+    }
+
+}
