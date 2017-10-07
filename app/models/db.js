@@ -1,6 +1,10 @@
 require('dotenv').config();
 const Sequelize = require('sequelize'); 
-const sequelize = 
+if (process.env.NODE_ENV = 'production'){
+    const sequelize = new Sequelize(process.env.DATABASE_URL)
+}
+else{
+    const sequelize = 
     new Sequelize(process.env.DATABASE_NAME, 
                   process.env.DATABASE_USERNAME, 
                   process.env.DATABASE_PASSWORD,
@@ -12,6 +16,7 @@ const sequelize =
                         underscored: true
                     }
     });
+}
 
 // Connect all the models/tables in the database to a db object, 
 //so everything is accessible via one object
