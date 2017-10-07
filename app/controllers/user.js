@@ -5,7 +5,7 @@ function create(req,res){
      models.user.find({where:{email:req.body.email}})
     .then((user) => {
         if (user){
-          return res.status(400).json({'message':'user already exists'});            
+          return Promise.reject('user already exists');            
         }
         else{
             return Promise.all([
@@ -20,7 +20,6 @@ function create(req,res){
         }
     })
     .then((user) => {
-        //mail_queue.send_to_queue(user[0]);
         mail_queue.sendMailToQueue(user[0]);
         return user[0].setPlans(user[1],{through:{active: true}});      
     })
@@ -29,7 +28,7 @@ function create(req,res){
     })
     .catch((error) => {
         console.log(error)
-        res.status(400).json(error);
+        res.status(400).json({message:error});
     });  
 }
 
