@@ -12,7 +12,7 @@ function analyze_tweets(accounts){
         for (let x = 0; x < accounts.length; x++){
         //loop through the pages tied to twitter accounts
             for (let y = 0; y < accounts[x].user_pages.length; y++){
-                let twitter = new twitter_service.Twitter();
+                let twitter = new twitter_service.Twitter( accounts[x].user_account.token_key,accounts[x].user_account.token_secret);
                 return Promise.all([models.keyword_sentiment.findOne({where:{page_id:accounts[x].user_pages[y].id}
                                                                 },{order:'created_at DESC'}),
                                     twitter.getUserProfileInfo(accounts[x].user_account.account_id,
@@ -26,10 +26,14 @@ function analyze_tweets(accounts){
                         since_id = results[0].last_post_id;
                     }
                     //To Do: add user access token and access key 
-                    //return new Promise((resolve,reject) =>{twitter.get_tweets(resolve,reject,'',results[1][0].screen_name,results[1][0].name)});
-                    return new Promise((resolve,reject) =>{twitter.get_tweets(resolve,reject,since_id,'@walmart','walmart')}); //testing on
+                    return new Promise((resolve,reject) =>{twitter.get_tweets(resolve,reject,'',results[1][0].screen_name,results[1][0].name)});
+                    ///return new Promise((resolve,reject) =>{twitter.get_tweets(resolve,reject,since_id,'@walmart','walmart')}); //testing on
                 })
                 .then((results)=>{
+                    if(results.array.length <= 0){
+                        return Promise.reject('User has no current tweets');
+                    }
+                    
                     let language_analyzer = new watson_language.LanguageAnalyzer();
                     let tone_analyzer = new watson_tone.ToneAnalyzer();
 

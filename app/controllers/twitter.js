@@ -1,5 +1,4 @@
 const twitter_service =  require('../services/twitter');
-const twitter = new twitter_service.Twitter();
 const models = require('../models/db');
 
 function getProfile(req,res){
@@ -11,8 +10,8 @@ function getProfile(req,res){
         }
         else{
             let profiles = Promise.all(profile_info.map((account)=>{
-                                       return twitter.getUserProfileInfo(account.User_Account.account_id,
-                                                                         account.User_Account.token_key,account.User_Account.token_secret);
+                                       let twitter = new twitter_service.Twitter(account.User_Account.token_key,account.User_Account.token_secret);
+                                       return twitter.getUserProfileInfo(account.User_Account.account_id);
                                       }));
             return profiles;
         }
@@ -34,7 +33,8 @@ function addAccount(req,res){
     Parameters:
     token_key,token_secret,group_id
     */
-    twitter.verifyCredentials(req.body.token_key,req.body.token_secret)
+    let twitter = new twitter_service.Twitter(req.body.token_key,req.body.token_secret);
+    twitter.verifyCredentials()
     .then((user_account_info)=>{
         return Promise.all([
            models.user_account.find({
