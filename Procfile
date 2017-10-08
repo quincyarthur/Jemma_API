@@ -1,4 +1,4 @@
 web: node server.js
-worker: node app/background_jobs/get_user_accounts.js
-worker: node app/background_jobs/analyze_user_accounts.js
-worker: node app/mailer/send_email.js
+getUser: node app/background_jobs/get_user_accounts.js
+analyzeUser: node app/background_jobs/analyze_user_accounts.js
+sendEmail: node app/mailer/send_email.js
