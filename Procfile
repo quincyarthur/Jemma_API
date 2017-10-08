@@ -1,4 +1,2 @@
 web: node server.js
-getUser: node app/background_jobs/get_user_accounts.js
-analyzeUser: node app/background_jobs/analyze_user_accounts.js
-sendEmail: node app/mailer/send_email.js
+background_jobs: nf start -j Procfile.worker

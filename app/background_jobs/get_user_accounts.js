@@ -9,10 +9,10 @@ let task = cron.schedule('* * * * *', ()=>{
     models.user.findAll({include:[{model:models.plan}]})
     .then((user)=>{
         for (let x = 0; x < user.length; x++){
-            if (!user[x].last_updated){
+            if (!user[x].lasted_updated){
                 user_queue.sendUserAccountToQueue(user[x].id);
             }
-            else if((today.getTime() - user[x].last_updated.getTime()) >= ((user[x].Plans[0].account_update_interval * 60) * 1000)){
+            else if((today.getTime() - user[x].lasted_updated.getTime()) >= ((user[x].Plans[0].account_update_interval * 60) * 1000)){
                 user_queue.sendUserAccountToQueue(user[x].id);
             }
         }

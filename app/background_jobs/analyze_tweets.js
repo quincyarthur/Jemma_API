@@ -67,7 +67,7 @@ function analyze_tweets(accounts){
                         return models.user.findById(accounts[x].user_account.user_id);
                     })
                     .then((user)=>{
-                        return user.update({last_updated:new Date});
+                        return user.update({lasted_updated:new Date});
                     })
                     .then((updated_user)=>{
                         console.log(`User id: ${updated_user.first_name} Account Successfully Updated`);
