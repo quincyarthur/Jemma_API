@@ -7,7 +7,7 @@ class Facebook{
             return new Promise((resolve,reject)=>{
                 FB.api('oauth/access_token', {
                     client_id: process.env.FACEBOOK_APP_ID,
-                    client_secret: 'client_secret',
+                    client_secret: FACEBOOK_APP_TOKEN,
                     grant_type: 'fb_exchange_token',
                     fb_exchange_token: temp_access_token
                 }, function (res) {
