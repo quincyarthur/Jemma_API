@@ -3,11 +3,11 @@ const FB = require('fb');
 
 class Facebook{
     constructor(){
-        this.extend_user_access_token = (resolve,reject,temp_access_token)=>{
+        this.extend_user_access_token = (temp_access_token)=>{
             return new Promise((resolve,reject)=>{
                 FB.api('oauth/access_token', {
                     client_id: process.env.FACEBOOK_APP_ID,
-                    client_secret: process.env.FACEBOOK_APP_TOKEN,
+                    client_secret: process.env.FACEBOOK_APP_SECRET,
                     grant_type: 'fb_exchange_token',
                     fb_exchange_token: temp_access_token
                 }, function (res) {
