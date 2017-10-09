@@ -7,6 +7,7 @@ function addAccount(req,res){
         res.status(200).json(extended_user_access_token);
     })
     .catch((error)=>{
+        console.log(error)
         res.status(400).json({message:error});
     })
 
