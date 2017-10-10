@@ -1,5 +1,6 @@
 require('dotenv').config();
 const FB = require('fb');
+const request = require('request');
 
 class Facebook{
     constructor(){
@@ -10,7 +11,7 @@ class Facebook{
                     client_secret: process.env.FACEBOOK_APP_SECRET,
                     grant_type: 'fb_exchange_token',
                     fb_exchange_token: temp_access_token
-                }, function (res) {
+                },(res) => {
                     if(!res || res.error) {
                         console.log(!res ? 'error occurred' : res.error);
                         return reject(res.error);
@@ -21,10 +22,67 @@ class Facebook{
             })   
         };
         this.get_extended_page_access_token = (extended_user_access_token)=>{
+            return new Promise((resolve,reject)=>{
+                FB.api('me/accounts',{access_token:extended_user_access_token},(res)=>{
+                    if(!res || res.error) {
+                        console.log(!res ? 'error occurred' : res.error);
+                        return reject(res.error);
+                    }
 
-        }
+                    if(typeof res.paging.next == "undefined"){
+                        return resolve(res.data.map((page)=>{ return {id:page.id,extended_access_token: page.access_token}})); //response only has one page of data
+                    }
+                    else{
+                        let arr_response = this.getPages(res.paging.next,res.data);
+                        return resolve(arr_response.map((page)=>{ return {id:page.id,extended_access_token: page.access_token}}));    
+                    }
+                    
+                })
+            })
+        };
+        this.get_posts = (extended_user_access_token) =>{
+            return new Promise((resolve,reject)=>{
+                FB.api('me/posts',{access_token:extended_user_access_token},(res)=>{
+                    if(!res || res.error) {
+                        console.log(!res ? 'error occurred' : res.error);
+                        return reject(res.error);
+                    }
+
+                    if(typeof res.paging.next == "undefined"){
+                        return resolve(res.data); //response only has one page of data
+                    }
+                    else{
+                        let arr_response = this.getPages(res.paging.next,res.data);
+                        return resolve(arr_response);    
+                    }
+                })
+            });
+        };
+        this.getPages = (next_url,prev_array) =>{
+            return new Promise((resolve,reject)=>{
+                request(next_url, function (err, res, body) {
+                    if(err){
+                        reject(error);
+                    }
+                    else{
+                        resolve(JSON.parse(body));
+                    }
+                })
+            })
+            .then((body)=>{
+                prev_array.push(body.data);
+                if (!typeof body.paging.next == "undefined"){
+                    this.getPages(body.paging.next,prev_array);
+                }   
+                return [].concat.apply([],prev_array);
+            })
+            .catch((error)=>{
+                console.log(error);
+            })
+        };
     }
 }
+
 module.exports = {
     Facebook:Facebook
 }

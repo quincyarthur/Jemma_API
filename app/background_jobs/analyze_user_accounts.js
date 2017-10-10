@@ -2,6 +2,7 @@ require('dotenv').config({path: '../../.env'});
 const kue = require('kue');
 const queue = kue.createQueue({redis:process.env.REDIS_URL});
 const twitter_tones = require('../background_jobs/analyze_tweets');
+const facebook_tones = require('../background_jobs/analyze_facebook');
 const models = require('../../app/models/db');
 
 
@@ -42,13 +43,12 @@ function getAccountPages(user_id){
                                                         return account.user_account.account_type_id === 4;
                                                     });
 
-        if (twitter_user_accounts){
+        if (twitter_user_accounts.length > 0){
             twitter_tones.analyze_tweets(twitter_user_accounts);
         };
 
         if (facebook_user_accounts.length > 0){
-            console.log(`Inside Facebook ${facebook_user_accounts}`)
-            //twitter_tones.analyze_tweets(twitter_user_accounts);
+            facebook_tones.analyze_fb(facebook_user_accounts);
         };
 
         if (instagram_user_accounts){

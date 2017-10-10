@@ -12,13 +12,9 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      account_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
       token_key: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: false
       },
       token_secret: {
         type: Sequelize.STRING,

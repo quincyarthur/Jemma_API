@@ -38,7 +38,7 @@ function addAccount(req,res){
     .then((user_account_info)=>{
         return Promise.all([
            models.user_account.find({
-                where:{user_id:req.user.id,account_id:user_account_info.id_str}
+                where:{user_id:req.user.id,token_key:req.body.token_key,token_secret:req.body.token_secret}
             }),
            models.account_type.findOne({where:{description:'Twitter'}}),
            Promise.resolve(user_account_info.id_str)
@@ -49,17 +49,16 @@ function addAccount(req,res){
            return Promise.all([
                 req.user.addAccount_Type(user_account[1], 
                     {through:{token_key:req.body.token_key,
-                              token_secret:req.body.token_secret,
-                              account_id:user_account[2]
+                              token_secret:req.body.token_secret
                              }
                     }
                 ),
                 models.page.findOrCreate({
                     where:{managed_page_id:user_account[2]},
                     defaults:{
-                        group_id: req.params.id,//req.body.group_id,
+                        group_id: req.params.id,
                         managed_page_id:user_account[2],
-                        keywords: req.body.keywords || []
+                        keywords: []
                     }
                 })
                 .spread((page,created)=>{

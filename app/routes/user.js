@@ -13,6 +13,8 @@ router.route('/subscription').post(passport.authenticate(),SubscriptionControlle
 
 router.route('/group/:id/accounts/Twitter').post(passport.authenticate(),TwitterController.addAccount);
 router.route('/group/:id/accounts/Facebook').post(passport.authenticate(),FacebookController.addAccount);
+//test route below please delete
+router.route('/group/:id/accounts/test/Facebook').post(FacebookController.getPosts);
 
 router.route('/:id')
       .get(UserController.find)

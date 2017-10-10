@@ -3,7 +3,6 @@ module.exports = function(sequelize, DataTypes) {
   var User_Account = sequelize.define('User_Account', 
   {
     user_id: DataTypes.INTEGER,
-    account_id: DataTypes.INTEGER,
     token_key: DataTypes.STRING,
     token_secret: DataTypes.STRING,
     account_type_id: DataTypes.INTEGER
