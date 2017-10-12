@@ -35,6 +35,7 @@ db.keyword_sentiment = require('./keyword_sentiment')(sequelize, Sequelize);
 db.page_tone = require('./page_tone')(sequelize, Sequelize);
 db.plan = require('./plan')(sequelize, Sequelize);
 db.post_tone = require('./post_tone')(sequelize, Sequelize);
+db.post_sentiment = require('./post_sentiment')(sequelize, Sequelize);
 db.preference = require('./preference')(sequelize, Sequelize);
 db.preference_type = require('./preference_type')(sequelize, Sequelize); 
 db.preference_value = require('./preference_value')(sequelize, Sequelize);
@@ -49,8 +50,8 @@ db.user = require('./user')(sequelize, Sequelize);
 //Relations
 //db.user.hasMany(db.user_account,{foreignKey: 'user_id' });
 //db.user_account.belongsTo(db.user,{foreignKey: 'id'});
-db.account_type.hasMany(db.user_account,{foreignKey: 'account_type_id' });
-db.user_account.belongsTo(db.account_type,{foreignKey: 'account_type_id' });
+//db.account_type.hasMany(db.user_account,{foreignKey: 'account_type_id' });
+//db.user_account.belongsTo(db.account_type,{foreignKey: 'account_type_id' });
 db.user.belongsToMany(db.account_type, {through: db.user_account,foreignKey: 'user_id' })
 db.account_type.belongsToMany(db.user, {through: db.user_account,foreignKey: 'account_type_id'})
 //db.user_account.hasMany(db.account_page,{foreignKey: 'user_account_id' });
@@ -76,6 +77,7 @@ db.page.hasMany(db.page_tone,{foreignKey: 'page_id' });
 db.tone.hasMany(db.page_tone,{foreignKey: 'tone_id' });
 //db.page_tone.belongsTo(db.tone);
 db.page.hasMany(db.post_tone,{foreignKey: 'page_id' });
+db.page.hasMany(db.post_sentiment,{foreignKey: 'page_id' });
 //db.post_tone.belongsTo(db.page);
 db.tone.hasMany(db.post_tone,{foreignKey: 'tone_id' });
 //db.post_tone.belongsTo(db.tone);

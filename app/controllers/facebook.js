@@ -32,25 +32,25 @@ function addAccount(req,res){
                         req.user.addAccount_Types(account[0],{through:{token_key:pages[1]}
                                                 }),
                         Promise.all(pages[0].map((page)=>{
-                            models.page.findOrCreate({
-                                where:{managed_page_id:page.id},
-                                defaults:{
-                                    group_id: req.params.id,
-                                    managed_page_id:page.id,
-                                    keywords: []
-                                }
-                            })
-                            .spread((page,created)=>{
-                                return Promise.resolve(page);
-                            })
-                        }))
-                        
+                            return new Promise((resolve,reject)=>{
+                                models.page.findOrCreate({
+                                    where:{managed_page_id:page.id},
+                                    defaults:{
+                                        group_id: req.params.id,
+                                        managed_page_id:page.id,
+                                        keywords: []
+                                    }
+                                })
+                                .spread((page,created)=>{
+                                    resolve(page);
+                                })
+                            }) 
+                        }))           
             ])
         })
         .then((results)=>{
             let flattened = [].concat.apply([],results);
-            return Promise.all(results[1].map((page)=>{flattened[0][0].addPage(page)
-                   }))
+            return flattened[0][0].addPages(results[1])
         })
         .then((account_page)=>{
             res.status(200).json({message:'Facebook Account successfully added'})

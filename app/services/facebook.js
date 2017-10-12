@@ -29,18 +29,18 @@ class Facebook{
                         return reject(res.error);
                     }
 
-                    if(typeof res.paging.next == "undefined"){
-                        return resolve(res.data.map((page)=>{ return {id:page.id,extended_access_token: page.access_token}})); //response only has one page of data
-                    }
-                    else{
+                    if('next' in res){
                         let arr_response = this.getPages(res.paging.next,res.data);
                         return resolve(arr_response.map((page)=>{ return {id:page.id,extended_access_token: page.access_token}}));    
+                    }
+                    else{
+                        return resolve(res.data.map((page)=>{ return {id:page.id,extended_access_token: page.access_token}})); //response only has one page of data
                     }
                     
                 })
             })
         };
-        this.get_posts = (extended_user_access_token) =>{
+        this.get_user_posts = (extended_user_access_token) =>{
             return new Promise((resolve,reject)=>{
                 FB.api('me/posts',{access_token:extended_user_access_token},(res)=>{
                     if(!res || res.error) {
@@ -48,13 +48,51 @@ class Facebook{
                         return reject(res.error);
                     }
 
-                    if(typeof res.paging.next == "undefined"){
-                        return resolve(res.data); //response only has one page of data
+                    if('next' in res){
+                        let arr_response = this.getPages(res.paging.next,res.data);
+                        return resolve(arr_response);
                     }
                     else{
-                        let arr_response = this.getPages(res.paging.next,res.data);
-                        return resolve(arr_response);    
+                        return resolve(res.data); //response only has one page of data  
                     }
+                })
+            });
+        };
+        this.get_page_posts = (extended_user_access_token,page_id) =>{
+            return new Promise((resolve,reject)=>{
+                FB.api(`${page_id}/posts`,{access_token:extended_user_access_token},(res)=>{
+                    
+                    if(!res || res.error) {
+                        console.log(!res ? 'error occurred' : res.error);
+                        return reject(res.error);
+                    }
+
+                    if('next' in res){
+                        let arr_response = this.getPages(res.paging.next,res.data);
+                        return resolve(arr_response); 
+                    }
+                    else{
+                        return resolve(res.data); //response only has one page of data 
+                    }
+                     
+                })
+            });
+        };
+        this.get_page_comments = (extended_user_access_token,post_id) =>{
+            return new Promise((resolve,reject)=>{
+                FB.api(`${post_id}/comments`,{access_token:extended_user_access_token},(res)=>{                  
+                    if(!res || res.error) {
+                        console.log(!res ? 'error occurred' : res.error);
+                        return reject(res.error);
+                    }
+                    
+                    if('next' in res){
+                        let arr_response = this.getPages(res.paging.next,res.data);
+                        return resolve(arr_response);  
+                    }
+                    else{
+                        return resolve(res.data); //response only has one page of data
+                    }  
                 })
             });
         };
@@ -71,9 +109,9 @@ class Facebook{
             })
             .then((body)=>{
                 prev_array.push(body.data);
-                if (!typeof body.paging.next == "undefined"){
+                if ('next' in body){
                     this.getPages(body.paging.next,prev_array);
-                }   
+                }  
                 return [].concat.apply([],prev_array);
             })
             .catch((error)=>{

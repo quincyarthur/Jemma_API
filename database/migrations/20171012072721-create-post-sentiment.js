@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('Post_Tones', {
+    return queryInterface.createTable('Post_Sentiments', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,18 +12,16 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       post_id: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
-      tone: {
+      keyword: {
         type: Sequelize.STRING
       },
       last_post_id: {
-        type: Sequelize.STRING
+        type: Sequelize.INTEGER
       },
-      post: {
-        type: Sequelize.ARRAY(Sequelize.TEXT),
-        allowNull: false,
-        defaultValue: []
+      tone_score: {
+        type: Sequelize.FLOAT
       },
       created_at: {
         allowNull: false,
@@ -36,6 +34,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('Post_Tones');
+    return queryInterface.dropTable('Post_Sentiments');
   }
 };
