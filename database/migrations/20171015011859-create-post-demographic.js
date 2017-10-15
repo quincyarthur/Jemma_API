@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('Post_Sentiments', {
+    return queryInterface.createTable('Post_Demographics', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -16,14 +16,14 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      keyword: {
+      country: {
         type: Sequelize.STRING
       },
-      last_post_id: {
-        type: Sequelize.INTEGER
+      gender: {
+        type: Sequelize.STRING
       },
-      tone_score: {
-        type: Sequelize.FLOAT
+      count: {
+        type: Sequelize.INTEGER
       },
       created_at: {
         allowNull: false,
@@ -36,6 +36,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('Post_Sentiments');
+    return queryInterface.dropTable('Post_Demographics');
   }
 };

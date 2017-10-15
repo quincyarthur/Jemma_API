@@ -78,9 +78,9 @@ class Facebook{
                 })
             });
         };
-        this.get_page_comments = (extended_user_access_token,post_id) =>{
+        this.get_page_comments = (extended_user_access_token,post_id,last_comment) =>{
             return new Promise((resolve,reject)=>{
-                FB.api(`${post_id}/comments`,{access_token:extended_user_access_token},(res)=>{                  
+                FB.api(`${post_id}/comments`,{access_token:extended_user_access_token,since:last_comment, order:'reverse_chronological'},(res)=>{                  
                     if(!res || res.error) {
                         console.log(!res ? 'error occurred' : res.error);
                         return reject(res.error);
@@ -93,6 +93,50 @@ class Facebook{
                     else{
                         return resolve(res.data); //response only has one page of data
                     }  
+                })
+            });
+        };
+        this.get_demo_info = (extended_user_access_token,arr_comment_users)=>{
+            return new Promise((resolve,reject)=>{
+                Promise.all(arr_comment_users.map((user)=>{
+                    return this.get_comment_demographics(extended_user_access_token,user)
+                }))
+                .then((demo_arr)=>{
+                    let demographics_array = demo_arr.filter((arr)=>{return arr != null});
+                    let demographics = demographics_array.reduce((demo_summary,demo)=>{
+                                            let key = `${demo.locale.substring(demo.locale.indexOf('_') + 1)},${demo.gender}`;
+
+                                            if(key in demo_summary){
+                                               demo_summary[key]++;
+                                            }
+                                            else{
+                                                demo_summary[key] = 1;
+                                            }
+
+                                            return demo_summary;
+                                        },{});
+                    console.log(`Check Services for keys: ${demographics.keys}`)
+                    resolve(demographics)
+                })
+                .catch((error)=>{
+                    console.log(error)
+                })
+            })
+        };
+        this.get_comment_demographics = (extended_user_access_token,user_id) =>{
+            return new Promise((resolve,reject)=>{
+                FB.api(`${user_id}`,{fields: ['gender','locale','age_range'],access_token:extended_user_access_token},(res)=>{
+                    if(!res || res.error) {
+                        console.log(!res ? 'error occurred' : res.error);
+                        return reject(res.error);
+                    }
+
+                    if('gender' in res){
+                        return resolve(res);  
+                    }
+                    else{
+                        return resolve(null)
+                    }
                 })
             });
         };
