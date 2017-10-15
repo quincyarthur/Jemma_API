@@ -103,8 +103,8 @@ function analyze_fb(accounts){
                                                         post:audience.text
                                                     })
                                                 })),
-                                        Promise.all(tone_elements[2].keys.map((key)=>{
-                                            let country = key.substring(0,key.indexOf(',')+ 1);
+                                        Promise.all(Object.keys(tone_elements[2]).map((key)=>{
+                                            let country = key.substring(0,key.indexOf(','));
                                             let gender =  key.substring(key.indexOf(',')+ 1);
                                             return accounts[x].user_pages[y].createPost_Demographic({
                                                     post_id: post_with_comments[a].post,
@@ -123,8 +123,8 @@ function analyze_fb(accounts){
                                                 tone_score:target.score
                                             })
                                         })),
-                                        Promise.all(tone_elements[2].keys.map((key)=>{
-                                            let country = key.substring(0,key.indexOf(',')+ 1);
+                                        Promise.all(Object.keys(tone_elements[2]).map((key)=>{
+                                            let country = key.substring(0,key.indexOf(','));
                                             let gender =  key.substring(key.indexOf(',')+ 1);
                                             return accounts[x].user_pages[y].createPost_Demographic({
                                                     post_id: post_with_comments[a].post,
@@ -145,8 +145,8 @@ function analyze_fb(accounts){
                                             post:audience.text
                                         })
                                     })),
-                                    Promise.all(tone_elements[2].keys.map((key)=>{
-                                        let country = key.substring(0,key.indexOf(',')+ 1);
+                                    Promise.all(Object.keys(tone_elements[2]).map((key)=>{
+                                        let country = key.substring(0,key.indexOf(','));
                                         let gender =  key.substring(key.indexOf(',')+ 1);
                                         return accounts[x].user_pages[y].createPost_Demographic({
                                                 post_id: post_with_comments[a].post,

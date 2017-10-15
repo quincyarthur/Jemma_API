@@ -115,7 +115,6 @@ class Facebook{
 
                                             return demo_summary;
                                         },{});
-                    console.log(`Check Services for keys: ${demographics.keys}`)
                     resolve(demographics)
                 })
                 .catch((error)=>{
