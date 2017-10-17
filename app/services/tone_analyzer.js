@@ -45,7 +45,7 @@ ToneAnalyzer.prototype.load_text = (text) =>{
       if((input.length + text[x].length < 50000 ) || x < 100 ){
         //tone alayzer will see new line characters in tweets and treat the new line as a seperate entity
         //replace new line and carriage returns with a space and add new line to seperate tweets
-        input+= text[x].replace(/[.\n\r]+/g, ' ') + '\n';
+        input+= text[x].replace(/[,.\n\r]+/g, ' ') + '\n';
 
         if(x === text.length - 1){
           batch.push(input);

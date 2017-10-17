@@ -78,6 +78,26 @@ class Facebook{
                 })
             });
         };
+        this.get_page_mentions = (extended_user_access_token,page_id,last_comment) =>{
+            return new Promise((resolve,reject)=>{
+                FB.api(`${page_id}/tagged`,{access_token:extended_user_access_token,since:last_comment,order:'reverse_chronological'},(res)=>{
+                    
+                    if(!res || res.error) {
+                        console.log(!res ? 'error occurred' : res.error);
+                        return reject(res.error);
+                    }
+
+                    if('next' in res){
+                        let arr_response = this.getPages(res.paging.next,res.data);
+                        return resolve(arr_response); 
+                    }
+                    else{
+                        return resolve(res.data); //response only has one page of data 
+                    }
+                     
+                })
+            });
+        };
         this.get_page_comments = (extended_user_access_token,post_id,last_comment) =>{
             return new Promise((resolve,reject)=>{
                 FB.api(`${post_id}/comments`,{access_token:extended_user_access_token,since:last_comment, order:'reverse_chronological'},(res)=>{                  
