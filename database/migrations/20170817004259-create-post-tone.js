@@ -9,20 +9,21 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       page_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+        type: Sequelize.INTEGER
       },
       post_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+        type: Sequelize.STRING
       },
-      tone_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+      tone: {
+        type: Sequelize.STRING
       },
-      tone_score: {
-        type: Sequelize.FLOAT,
-        allowNull: false
+      last_post_id: {
+        type: Sequelize.STRING
+      },
+      post: {
+        type: Sequelize.ARRAY(Sequelize.TEXT),
+        allowNull: false,
+        defaultValue: []
       },
       created_at: {
         allowNull: false,

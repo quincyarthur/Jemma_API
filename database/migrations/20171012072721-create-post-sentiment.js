@@ -1,28 +1,29 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('User_Accounts', {
+    return queryInterface.createTable('Post_Sentiments', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      user_id: {
+      page_id: {
         type: Sequelize.INTEGER,
         allowNull: false
       },
-      token_key: {
+      post_id: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      token_secret: {
-        type: Sequelize.STRING,
-        allowNull: true
+      keyword: {
+        type: Sequelize.STRING
       },
-      account_type_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false
+      last_post_id: {
+        type: Sequelize.INTEGER
+      },
+      tone_score: {
+        type: Sequelize.FLOAT
       },
       created_at: {
         allowNull: false,
@@ -35,6 +36,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('User_Accounts');
+    return queryInterface.dropTable('Post_Sentiments');
   }
 };

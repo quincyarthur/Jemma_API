@@ -53,7 +53,7 @@ LanguageAnalyzer.prototype.load_text = (text) =>{
 
         for(let index = 0; index < text.length; index++){
             if (characters.length + text[index].length < 50000){
-                characters+= text[index].replace(/[\n\r]+/g, ' ') + '\n';
+                characters+= text[index].replace(/[.,\n\r]+/g, ' ') + '\n';
                 
                 if(index === text.length - 1){//if end of array and text still less than 50,000 chars add
                     batch_text.push(characters);

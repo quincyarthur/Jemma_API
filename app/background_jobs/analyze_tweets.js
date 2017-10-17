@@ -52,23 +52,51 @@ function analyze_tweets(accounts){
                                         ]);
                     })
                     .then((tone_elements)=>{
-                        return Promise.all([Promise.all(tone_elements[0][0].sentiment.targets.map((target) =>{
-                                                            return  accounts[x].user_pages[y].createKeyword_Sentiment({keyword:target.text,
-                                                                last_post_id: results.max_id,
-                                                                tone_score:target.score
-                                                            })
-                                                        })),
-                                            Promise.all(tone_elements[1][0].map((audience) =>{
-                                                            return  accounts[x].user_pages[y].createMention_Tone({tone:audience.tone,
-                                                                last_post_id: results.max_id,
-                                                                post:audience.text
-                                                            })
-                                                        }))
-                                           ]);
+                        if('sentiment' in tone_elements[0][0] && tone_elements[1][0].length > 0 ){
+                            return Promise.all([Promise.all(tone_elements[0][0].sentiment.targets.map((target) =>{
+                                                                return  accounts[x].user_pages[y].createKeyword_Sentiment({keyword:target.text,
+                                                                    last_post_id: results.max_id,
+                                                                    tone_score:target.score
+                                                                })
+                                                            })),
+                                                Promise.all(tone_elements[1][0].map((audience) =>{
+                                                                return  accounts[x].user_pages[y].createMention_Tone({tone:audience.tone,
+                                                                    last_post_id: results.max_id,
+                                                                    post:audience.text
+                                                                })
+                                                            }))
+                                            ]);
+                        }
+                        else if('sentiment' in tone_elements[0][0]){
+                            Promise.all([Promise.all(tone_elements[0][0].sentiment.targets.map((target) =>{
+                                            return  accounts[x].user_pages[y].createKeyword_Sentiment({keyword:target.text,
+                                                last_post_id: results.max_id,
+                                                tone_score:target.score
+                                            })
+                                        }))
+                                    ]);
+                        }
+                        else if(tone_elements[1][0].length > 0 ){
+                            return Promise.all([Promise.all(tone_elements[1][0].map((audience) =>{
+                                                    return  accounts[x].user_pages[y].createMention_Tone({tone:audience.tone,
+                                                        last_post_id: results.max_id,
+                                                        post:audience.text
+                                                    })
+                                                }))
+                                            ]);
+                        }
+                        else{
+                            return null;
+                        }
                     })
                     .then((created_records)=>{
-                        console.log('Page Tones Successfully Updated');
-                        return models.user.findById(accounts[x].user_account.user_id);
+                        if(created_records){
+                            console.log('Page Tones Successfully Updated');
+                            return models.user.findById(accounts[x].user_account.user_id);
+                        }
+                        else{
+                            return Promise.reject('No targets or tones found');
+                        }  
                     })
                     .then((user)=>{
                         return user.update({lasted_updated:new Date});

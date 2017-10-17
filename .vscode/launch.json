@@ -21,7 +21,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceRoot}\\server.js"
+            "program": "${workspaceRoot}\\app\\services\\facebook.js"
             //"program":"${workspaceRoot}\\app\\services\\test.js"
         }
     ]
