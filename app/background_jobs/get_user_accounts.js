@@ -4,7 +4,7 @@ const models = require('../models/db');
 const user_queue = require('../background_jobs/send_kue');
 
 //task will run once every minute
-//let task = cron.schedule('* * * * *', ()=>{
+let task = cron.schedule('* * * * *', ()=>{
     let today = new Date();
     models.user.findAll({include:[{model:models.plan}]})
     .then((user)=>{
@@ -20,6 +20,6 @@ const user_queue = require('../background_jobs/send_kue');
     .catch((error)=>{
         console.log(error);
     })
-/*});
+});
  
-task.start();*/
+task.start();

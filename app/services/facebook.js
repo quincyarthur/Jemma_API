@@ -78,6 +78,25 @@ class Facebook{
                 })
             });
         };
+        this.get_page_info = (extended_user_access_token,page_id) =>{
+            return new Promise((resolve,reject)=>{
+                FB.api(`${page_id}`,{fields: ['picture{url}','name','fan_count','likes'],access_token:extended_user_access_token},(res)=>{  
+                    if(!res || res.error) {
+                        console.log(!res ? 'error occurred' : res.error);
+                        return reject(res.error);
+                    }
+                    
+                    if('next' in res){
+                        let arr_response = this.getPages(res.paging.next,res);
+                        return resolve(arr_response); 
+                    }
+                    else{
+                        return resolve(res); //response only has one page of data 
+                    }
+                     
+                })
+            });
+        };
         this.get_page_mentions = (extended_user_access_token,page_id,last_comment) =>{
             return new Promise((resolve,reject)=>{
                 FB.api(`${page_id}/tagged`,{access_token:extended_user_access_token,since:last_comment,order:'reverse_chronological'},(res)=>{
