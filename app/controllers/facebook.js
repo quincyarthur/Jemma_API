@@ -1,3 +1,5 @@
+const watson_language = require('../services/language_analyzer');
+const watson_tone = require('../services/tone_analyzer');
 const fb_service = require('../services/facebook');
 const facebook = new fb_service.Facebook();
 const models = require('../models/db');
@@ -13,28 +15,31 @@ function getPosts(req,res){
     })
 }
 
-function getUserAccountInfo(req,res){
+function getPageInfo(req,res){
     //get all facebook accounts tied to user
-    req.user.getAccount_Types({account_type_id:2})
-    .then((facebook_accounts)=>{
-        for(let x = 0; x < facebook_accounts.length; x++){
+    req.user.getUser_Accounts({account_id:req.params.account_id})
+    .then((facebook_account)=>{
             //equivalent of 'me/accounts' ensures user only sees pages they continue to admin
-            facebook.get_extended_page_access_token(facebook_accounts[x].User_Account.token_key)
+            facebook.get_extended_page_access_token(facebook_account[0].token_key)
             .then((authorized_pages)=>{
-                facebook_accounts[x].User_Account.getPages()
-                .then((pages)=>{
-                    let user_pages = pages.filter((page)=>{return authorized_pages.map((auth)=>{return auth.id}).indexOf(page.managed_page_id) >= 0 });
-                    return user_pages;
-                    //res.json(user_pages)
+                facebook_account[0].getPages({where:{managed_page_id:req.params.page_id}})
+                .then((page)=>{
+                    let user_page = page.filter((page)=>{return authorized_pages.map((auth)=>{return auth.id}).indexOf(page.managed_page_id) >= 0 });
+                    return user_page;
                 })
-                .then((user_pages)=>{
-                  return Promise.all(user_pages.map((page)=>{
-                        return facebook.get_page_info(facebook_accounts[x].User_Account.token_key,page.managed_page_id);
-                    }))
+                .then((user_page)=>{
+                    if (user_page.length > 0){
+                        return Promise.all(user_page.map((page)=>{
+                            return facebook.get_page_info(facebook_account[0].token_key,page.managed_page_id);
+                        }))
+                    }
+                    else{
+                        return Promise.reject("User is not authorized to manage page");
+                    }
                 })
                 .then((page_info)=>{
                     let page = Promise.all(page_info.map((page)=>{
-                        return facebook.get_page_posts(facebook_accounts[x].User_Account.token_key,page.id)
+                        return facebook.get_page_posts(facebook_account[0].token_key,page.id)
                         .then((posts)=>{
                             let user_posts = posts.filter((post)=> {return 'message' in post})
                             return {name:page.name,num_fans:page.fan_count,picture:page.picture.data.url,posts:user_posts}
@@ -56,14 +61,12 @@ function getUserAccountInfo(req,res){
             .catch((error)=>{
                 res.status(400).json({message:error});
                 console.log(error)
-            })          
-        }
-        
+            })                  
     })
 }
 
 function getPostSentiment(req,res){
-    models.page.findById(req.params.page_id)
+    models.page.find({where:{managed_page_id:req.params.page_id}})
     .then((page)=>{
         let language_analyzer = new watson_language.LanguageAnalyzer();
         let keywords = language_analyzer.params.features.sentiment.targets.concat(page.keywords);
@@ -71,7 +74,7 @@ function getPostSentiment(req,res){
                                         FROM "Post_Sentiments" 
                                         WHERE post_id = :post_id and keyword in (:keyword)
                                         GROUP BY keyword`,
-        {replacements:{post_id:request.params.post_id,keyword:keywords},
+        {replacements:{post_id:req.params.post_id,keyword:keywords},
         type: models.sequelize.QueryTypes.SELECT})
     })     
     .then((sentiments)=>{
@@ -104,7 +107,7 @@ function getPostDemographics(req,res){
                                     FROM "Post_Demographics" 
                                     WHERE post_id = :post_id
                                     GROUP BY country,gender`,
-    {replacements:{post_id:request.params.post_id,keyword:keywords},
+    {replacements:{post_id:req.params.post_id},
     type: models.sequelize.QueryTypes.SELECT})  
     .then((demographics)=>{
         res.status(200).json(demographics);
@@ -116,14 +119,14 @@ function getPostDemographics(req,res){
 }
 
 function getMentionTones(req,res){
-    models.page.findById(req.params.page_id)
+    models.page.find({where:{managed_page_id:req.params.page_id}})
     .then((page)=>{
         return models.sequelize.query(`SELECT tone,string_agg(array_to_string(post,';'),';') as posts
                                         FROM "Mention_Tones" 
                                         where page_id = :page_id
                                         and created_at between :from and :to
                                         GROUP BY page_id,tone`,
-                                {replacements:{page_id:page.id,from:req.body.from,to:req.body.to},
+                                {replacements:{page_id:page.id,from:new Date(`${req.body.from} 00:00:00`),to:new Date(`${req.body.to} 23:59:59`)},
                                 type: models.sequelize.QueryTypes.SELECT})
     })     
     .then((sentiments)=>{
@@ -136,16 +139,16 @@ function getMentionTones(req,res){
 }
 
 function getMentionSentiments(req,res){
-    models.page.findById(req.params.page_id)
+    models.page.find({where:{managed_page_id:req.params.page_id}})
     .then((page)=>{
         let language_analyzer = new watson_language.LanguageAnalyzer();
         let keywords = language_analyzer.params.features.sentiment.targets.concat(page.keywords);
         return models.sequelize.query(`SELECT keyword,AVG(tone_score) score
                                         FROM "Keyword_Sentiments" 
                                         WHERE page_id = :page_id and keyword in (:keyword)
-                                        AND created_at between :from and :to
+                                        AND created_at::date between :from and :to
                                         GROUP BY keyword`,
-                        {replacements:{page_id:page.id,keyword:keywords,from:req.body.from,to:req.body.to},
+                        {replacements:{page_id:page.id,keyword:keywords,from:new Date(`${req.body.from} 00:00:00`),to:new Date(`${req.body.to} 23:59:59`)},
                         type: models.sequelize.QueryTypes.SELECT})
     })     
     .then((sentiments)=>{
@@ -159,18 +162,23 @@ function getMentionSentiments(req,res){
 
 function addAccount(req,res){
     return Promise.all([models.account_type.findOne({where:{description:'Facebook'}}),
-                        facebook.extend_user_access_token(req.body.temp_user_access_token)
+                        facebook.extend_user_access_token(req.body.temp_user_access_token),
+                        models.user_account.findOne({where:{account_id:req.params.account_id}})
                        ])
     .then((results)=>{
+        if (!results[2]){
             let arr_pages = req.body.pages.split(',');
-            return Promise.all([req.user.addAccount_Types(results[0],{through:{token_key:results[1]}}),
+            return Promise.all([req.user.createUser_Account({
+                                            account_id: req.params.account_id,
+                                            token_key:results[1],
+                                            account_type_id:results[0].id}),
                                 Promise.all(arr_pages.map((page)=>{
                                     return new Promise((resolve,reject)=>{
                                         models.page.findOrCreate({
-                                            where:{managed_page_id:page.id},
+                                            where:{managed_page_id:page},
                                             defaults:{
-                                                group_id: req.params.id,
-                                                managed_page_id:page.id,
+                                                group_id: req.params.group_id,
+                                                managed_page_id:page,
                                                 keywords: []
                                             }
                                         })
@@ -180,10 +188,14 @@ function addAccount(req,res){
                                     }) 
                                 }))           
                             ])
+        }
+        else{
+            return Promise.reject('Account already tied to user')
+        }     
     })
     .then((accounts)=>{
         let flattened = [].concat.apply([],accounts);
-        return flattened[0][0].addPages(accounts[1])
+        return flattened[0].addPages(accounts[1])
     })
     .then((account_page)=>{
         res.status(200).json({message:'Facebook Account successfully added'})
@@ -194,6 +206,48 @@ function addAccount(req,res){
     })
 }
 
+function addPages(req,res){
+    let pages = new Promise((resolve,reject)=>{
+        if (!req.body.pages){
+            return reject("No Pages Specified");
+         }
+         else{
+            let arr_pages = req.body.pages.split(',');
+            return resolve(arr_pages);
+         }
+    });
+
+    pages
+    .then((arr_pages)=>{
+        return Promise.all([req.user.getUser_Accounts({account_id:req.params.account_id}),
+                            Promise.all(arr_pages.map((page)=>{
+                                return new Promise((resolve,reject)=>{
+                                    models.page.findOrCreate({
+                                        where:{managed_page_id:page},
+                                        defaults:{
+                                            group_id: req.params.id,
+                                            managed_page_id:page,
+                                            keywords: []
+                                        }
+                                    })
+                                    .spread((page,created)=>{
+                                        resolve(page);
+                                    })
+                                }) 
+                            }))
+        ])
+    })
+    .then((results)=>{
+        return results[0][0].addPages(results[1]);
+    })
+    .then((fb_pages)=>{
+        res.status(200).json({message:"Facebook Pages Successfully Added"})
+    })
+    .catch((error)=>{
+        console.log(error)
+        res.status(400).json({message:error})
+    })
+}
 function addAccount_Previous_Version(req,res){
     return facebook.extend_user_access_token(req.body.temp_user_access_token)
     .then((extended_user_access_token)=>{
@@ -252,10 +306,11 @@ function addAccount_Previous_Version(req,res){
 module.exports = {
     addAccount:addAccount,
     getPosts:getPosts,
-    getUserAccountInfo:getUserAccountInfo,
+    getPageInfo:getPageInfo,
     getPostSentiment:getPostSentiment,
     getPostTones:getPostTones,
     getMentionSentiments:getMentionSentiments,
     getMentionTones:getMentionTones,
-    getPostDemographics:getPostDemographics
+    getPostDemographics:getPostDemographics,
+    addPages:addPages
 }

@@ -37,7 +37,7 @@ router.use('/page',page_routes);
 
 //add catch all route to clean up any rogue requests
 app.all('*',(req,res)=>{
-    res.json({message:'404 route not found'});
+    res.status(400).json({message:'404 route not found'});
 });
 
 models.sequelize.sync().then(function() {
