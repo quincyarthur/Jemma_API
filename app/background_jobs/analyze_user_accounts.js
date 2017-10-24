@@ -14,13 +14,13 @@ queue.process('update_user_accounts',10,(job,done) => {
 });
 
 function getAccountPages(user_id){
-    models.user.findById(user_id,{include:[{model:models.account_type}]})
+    models.user.findById(user_id,{include:[{model:models.user_account}]})
     .then((user)=>{
-        let user_account = Promise.all(user.Account_Types.map((account)=>{
+        let user_account = Promise.all(user.User_Accounts.map((account)=>{
                 return new Promise((resolve,reject)=>{
-                    account.User_Account.getPages()
+                    account.getPages()
                     .then((account_page)=>{
-                            resolve({user_account:account.User_Account,user_pages:account_page})
+                            resolve({user_account:account,user_pages:account_page})
                     })
                     .catch((error)=>{
                         reject(error);

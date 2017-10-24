@@ -57,9 +57,21 @@ function destroy(req,res){
    })
 }
 
+function getAccountInfo(req,res){
+    req.user.getUser_Accounts({attributes:['account_id','account_type_id'],include:[{attributes:['group_id','managed_page_id'],model:models.page}]})
+    .then((user_accounts)=>{
+        res.status(200).json(user_accounts);
+    })
+    .catch((error)=>{
+        console.log({message:error})
+        res.status(400).json({message:error})
+    })
+}
+
 module.exports = {
    create:create,
    find:find,
    update:update,
-   destroy:destroy
+   destroy:destroy,
+   getAccountInfo:getAccountInfo
 }
