@@ -16,7 +16,6 @@ function getPosts(req,res){
 }
 
 function getPageInfo(req,res){
-    //get all facebook accounts tied to user
     req.user.getUser_Accounts({account_id:req.params.account_id})
     .then((facebook_account)=>{
             //equivalent of 'me/accounts' ensures user only sees pages they continue to admin
@@ -34,7 +33,7 @@ function getPageInfo(req,res){
                         }))
                     }
                     else{
-                        return Promise.reject("User is not authorized to manage page");
+                        return Promise.reject("User is no longer authorized to manage page");
                     }
                 })
                 .then((page_info)=>{

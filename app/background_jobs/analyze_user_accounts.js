@@ -16,7 +16,6 @@ queue.process('update_user_accounts',10,(job,done) => {
 function getAccountPages(user_id){
     models.user.findById(user_id,{include:[{model:models.user_account}]})
     .then((user)=>{
-        console.log(`User Accounts Test: ${JSON.stringify(user,null,2)}`)
         let user_account = Promise.all(user.User_Accounts.map((account)=>{
                 return new Promise((resolve,reject)=>{
                     account.getPages()

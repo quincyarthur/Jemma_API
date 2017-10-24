@@ -58,6 +58,7 @@ db.user.belongsToMany(db.account_type, {through: db.user_account,foreignKey: 'us
 db.account_type.belongsToMany(db.user, {through: db.user_account,foreignKey: 'account_type_id'})
 *****/
 db.user_account.hasMany(db.account_page,{foreignKey: 'user_account_id' });
+db.account_type.hasMany(db.user_account,{foreignKey: 'account_type_id' });
 //db.account_page.belongsTo(db.user_account);
 //db.page.hasMany(db.account_page,{foreignKey: 'page_id' });
 //db.account_page.belongsTo(db.page);

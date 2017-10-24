@@ -8,6 +8,7 @@ const passport = require('../services/passport')();
 
 //Create User Account
 router.route('/').post(UserController.create);
+router.route('/account/info').get(passport.authenticate(),UserController.getAccountInfo)
 
 //User Twitter Account
 router.route('/group/:group_id/account/:account_id/twitter').post(passport.authenticate(),TwitterController.addAccount);

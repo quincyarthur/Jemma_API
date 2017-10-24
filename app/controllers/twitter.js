@@ -5,7 +5,7 @@ const models = require('../models/db');
 function getProfile(req,res){
     req.user.getUser_Accounts({where:{account_id:req.params.account_id}})
     .then((profile_info)=>{
-        if (profile_info.length <= 0){
+        if (profile_info.length > 0){
             return Promise.all(profile_info.map((account)=>{
                                 console.log(JSON.stringify(account,null,2))
                                 let twitter = new twitter_service.Twitter(account.token_key,account.token_secret);
@@ -13,7 +13,7 @@ function getProfile(req,res){
                }));   
         }
         else{
-            return Promise.reject('Twitter Account already tied to user');
+            return Promise.reject('Twitter Account does not exist');
         }
     })
     .then((profile)=>{
