@@ -84,6 +84,26 @@ function getPostSentiment(req,res){
         res.status(400).json({message:error});
     });
 }
+function getAllPostSentiment(req,res){
+    models.page.find({where:{managed_page_id:req.params.page_id}})
+    .then((page)=>{
+        let language_analyzer = new watson_language.LanguageAnalyzer();
+        let keywords = language_analyzer.params.features.sentiment.targets.concat(page.keywords);
+        return models.sequelize.query(`SELECT page_id,post_id,keyword,AVG(tone_score) score
+                                        FROM "Post_Sentiments" 
+                                        WHERE page_id = :page_id
+                                        GROUP BY page_id,post_id,keyword`,
+        {replacements:{page_id:page.id},
+        type: models.sequelize.QueryTypes.SELECT})
+    })     
+    .then((sentiments)=>{
+        res.status(200).json(sentiments);
+    })
+    .catch((error)=>{
+        console.log(error)
+        res.status(400).json({message:error});
+    });
+}
 
 function getPostTones(req,res){
     return models.sequelize.query(`SELECT tone,string_agg(array_to_string(post,';'),';') as posts
@@ -92,6 +112,25 @@ function getPostTones(req,res){
                                     GROUP BY post_id,tone`,
                 {replacements:{post_id:req.params.post_id},
                 type: models.sequelize.QueryTypes.SELECT})  
+    .then((tones)=>{
+        res.status(200).json(tones);
+    })
+    .catch((error)=>{
+        console.log(error)
+        res.status(400).json({message:error});
+    });
+}
+
+function getAllPostTones(req,res){
+    models.page.find({where:{managed_page_id:req.params.page_id}})
+    .then((page)=>{
+            return models.sequelize.query(`SELECT page_id,post_id,tone,string_agg(array_to_string(post,';'),';') as posts
+                                            FROM "Post_Tones" 
+                                            where page_id = :page_id
+                                            GROUP BY page_id,post_id,tone`,
+            {replacements:{page_id:page.id},
+            type: models.sequelize.QueryTypes.SELECT}) 
+    })
     .then((tones)=>{
         res.status(200).json(tones);
     })
@@ -307,7 +346,9 @@ module.exports = {
     getPosts:getPosts,
     getPageInfo:getPageInfo,
     getPostSentiment:getPostSentiment,
+    getAllPostSentiment:getAllPostSentiment,
     getPostTones:getPostTones,
+    getAllPostTones:getAllPostTones,
     getMentionSentiments:getMentionSentiments,
     getMentionTones:getMentionTones,
     getPostDemographics:getPostDemographics,

@@ -22,7 +22,10 @@ function updateGroup(req,res){
 
 function addGroup(req,res){
     models.group.create({
-        name: req.body.name
+        name: req.body.name,
+        type: req.body.type,
+        description: req.body.description,
+        categories: req.body.categories.split(',')
     })
     .then((group)=>{
         res.status(200).json({message:`${group.name} group successfully created`});
