@@ -1,29 +1,29 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('Groups', {
+    return queryInterface.createTable('Post_Demographics', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
+      page_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
+      post_id: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      type: {
-        type: Sequelize.STRING,
-        allowNull: false
+      country: {
+        type: Sequelize.STRING
       },
-      categories: {
-        type: Sequelize.ARRAY(Sequelize.TEXT),
-        allowNull: false,
-        defaultValue: []
+      gender: {
+        type: Sequelize.STRING
       },
-      description: {
-        type: Sequelize.STRING,
-        allowNull: false
+      count: {
+        type: Sequelize.INTEGER
       },
       created_at: {
         allowNull: false,
@@ -36,6 +36,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('Groups');
+    return queryInterface.dropTable('Post_Demographics');
   }
 };

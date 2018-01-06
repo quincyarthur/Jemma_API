@@ -81,6 +81,7 @@ class Twitter {
             return new Promise((resolve,reject)=>{
                 this.client.get(path,params)
                 .then((user_account_info)=>{
+                    console.log(`Test User Info: ${JSON.stringify(user_account_info,null,2)}`)
                     resolve(user_account_info);
                 })
                 .catch((error)=>{

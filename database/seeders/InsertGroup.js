@@ -1,7 +1,12 @@
 'use strict';
 module.exports = {
   up: function (queryInterface, Sequelize) {
-    let groups = [{name:'Walmart',created_at: new Date, updated_at: new Date}];
+    let groups = [{name:'Walmart',
+                   type: 'test',
+                   categories: [''],
+                   description: 'test group',
+                   created_at: new Date, 
+                   updated_at: new Date}];
       return queryInterface.bulkInsert('Groups',groups,null);
   },
 
