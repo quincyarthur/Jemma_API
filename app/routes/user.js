@@ -5,11 +5,15 @@ const TwitterController = require('../controllers/twitter');
 const FacebookController = require('../controllers/facebook');
 const InstagramController = require('../controllers/instagram');
 const SubscriptionController = require('../controllers/subscription');
+const GroupController = require('../controllers/group');
 const passport = require('../services/passport')();
 
 //Create User Account
 router.route('/').post(UserController.create);
 router.route('/account/info').get(passport.authenticate(),UserController.getAccountInfo)
+
+//User Groups
+router.route('/groups/').get(passport.authenticate(),GroupController.getUserGroups);
 
 //User Subscriptions
 router.route('/subscriptions').get(passport.authenticate(),SubscriptionController.getSubscription);

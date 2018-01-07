@@ -56,9 +56,51 @@ function findGroup(req,res){
     });
 }
 
+function getUserGroups(req,res){
+    req.user.getUser_Accounts()
+    .then((user_account)=>{
+        let user_groups = Promise.all(user_account.map((account)=>{
+                            return new Promise((resolve,reject)=>{
+                                account.getPages()
+                                .then((account_page)=>{
+                                    resolve({user_groups:account_page.map((account)=>{return account.group_id})})
+                                })
+                                .catch((error)=>{
+                                    reject(error);
+                                })
+                            })
+            }));
+    
+        return user_groups;
+    })
+    .then((user_groups)=>{
+        let distinct_groups = [...new Set(user_groups[0].user_groups)];
+        let groups = Promise.all(distinct_groups.map((id)=>{
+                                   return new Promise((resolve,reject)=>{
+                                            models.group.findById(id)
+                                            .then((group)=>{
+                                                resolve(group)
+                                            })
+                                            .catch((error)=>{
+                                                reject(error)
+                                            })
+                                   })
+                                }))
+        return groups
+    })
+    .then((groups)=>{
+        res.status(200).json(groups);
+    })
+    .catch((error)=>{
+        console.log(`Error: ${JSON.stringify(error)}`)
+        res.status(400).json({message:error});
+    })
+}
+
 module.exports = {
     addGroup:addGroup,
     findGroup:findGroup,
     updateGroup:updateGroup,
-    deleteGroup:deleteGroup
+    deleteGroup:deleteGroup,
+    getUserGroups,getUserGroups
 }
