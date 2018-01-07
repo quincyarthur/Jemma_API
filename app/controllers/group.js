@@ -2,10 +2,6 @@ require('dotenv').config();
 const models = require('../models/db');
 
 function updateGroup(req,res){
-    /*
-    Parameters
-    id,name
-     */
     models.group.findById(req.params.id)
     .then((group)=>{
         return group.update({
@@ -21,16 +17,19 @@ function updateGroup(req,res){
 }
 
 function addGroup(req,res){
-    models.group.create({
-        name: req.body.name,
-        type: req.body.type,
-        description: req.body.description,
-        categories: req.body.categories.split(',')
-    })
+    req.user.createGroup({name: req.body.name,
+                        type: req.body.type,
+                        description: req.body.description,
+                        categories: req.body.categories.split(',')
+                        })
     .then((group)=>{
-        res.status(200).json({message:`${group.name} group successfully created`});
+        return Promise.all([group],req.user.addGroups(group)) 
+    })
+    .then((result)=>{
+        res.status(200).json({message:`${result[0].name} group successfully created`});
     })
     .catch((error)=>{
+        console.log(error)
         res.status(400).json({message:error});
     });
 }
@@ -47,53 +46,41 @@ function deleteGroup(req,res){
 }
 
 function findGroup(req,res){
-    models.group.findById(req.params.id)
+    req.user.getGroups({id:req.params.id})
+    .then((group)=>{
+        if (group.length <= 0){
+            return Promise.reject("User is not a memeber of group")
+        } 
+        else{
+            res.status(200).json(group)
+        }
+    })
+    .catch((error)=>{
+        res.status(400).json({message:error});
+    });
+    /*models.group.findById(req.params.id)
     .then((group)=>{
         res.status(200).json(group)
     })
     .catch((error)=>{
         res.status(400).json({message:error});
-    });
+    });*/
+}
+
+function addGroupMemebr(req,res){
+
 }
 
 function getUserGroups(req,res){
-    req.user.getUser_Accounts()
-    .then((user_account)=>{
-        let user_groups = Promise.all(user_account.map((account)=>{
-                            return new Promise((resolve,reject)=>{
-                                account.getPages()
-                                .then((account_page)=>{
-                                    resolve({user_groups:account_page.map((account)=>{return account.group_id})})
-                                })
-                                .catch((error)=>{
-                                    reject(error);
-                                })
-                            })
-            }));
-    
-        return user_groups;
-    })
-    .then((user_groups)=>{
-        let distinct_groups = [...new Set(user_groups[0].user_groups)];
-        let groups = Promise.all(distinct_groups.map((id)=>{
-                                   return new Promise((resolve,reject)=>{
-                                            models.group.findById(id)
-                                            .then((group)=>{
-                                                resolve(group)
-                                            })
-                                            .catch((error)=>{
-                                                reject(error)
-                                            })
-                                   })
-                                }))
-        return groups
-    })
+    req.user.getGroups()
     .then((groups)=>{
-        res.status(200).json(groups);
+        let formatted_groups = groups.map((group)=>{
+                        return {name:group.name,type:group.type,description:group.description,categories:group.categories}
+                        })
+        res.status(200).json(formatted_groups)
     })
     .catch((error)=>{
-        console.log(`Error: ${JSON.stringify(error)}`)
-        res.status(400).json({message:error});
+        res.status(400).json({message:error})
     })
 }
 

@@ -13,7 +13,9 @@ router.route('/').post(UserController.create);
 router.route('/account/info').get(passport.authenticate(),UserController.getAccountInfo)
 
 //User Groups
+router.route('/group').post(passport.authenticate(),GroupController.addGroup);
 router.route('/groups/').get(passport.authenticate(),GroupController.getUserGroups);
+router.route('/group/:id').get(passport.authenticate(),GroupController.findGroup);
 
 //User Subscriptions
 router.route('/subscriptions').get(passport.authenticate(),SubscriptionController.getSubscription);

@@ -46,6 +46,7 @@ db.tone = require('./tone')(sequelize, Sequelize);
 db.page = require('./page')(sequelize, Sequelize);
 db.user_account = require('./user_account')(sequelize, Sequelize);
 db.user = require('./user')(sequelize, Sequelize);
+db.group_member = require('./group_member')(sequelize, Sequelize);
 
 
 //Relations
@@ -63,6 +64,7 @@ db.account_type.hasMany(db.user_account,{foreignKey: 'account_type_id' });
 //db.page.hasMany(db.account_page,{foreignKey: 'page_id' });
 //db.account_page.belongsTo(db.page);
 db.user_account.belongsToMany(db.page, {through: db.account_page,foreignKey: 'user_account_id' });
+db.user.hasOne(db.group,{foreignKey: 'user_id' });
 db.page.belongsToMany(db.user_account, {through: db.account_page,foreignKey: 'page_id'});
 db.group.hasOne(db.page,{foreignKey: 'group_id' });
 //db.page.belongsTo(db.group);
@@ -89,5 +91,8 @@ db.page.hasMany(db.post_demographic,{foreignKey: 'page_id' });
 db.page.hasMany(db.keyword_sentiment,{foreignKey: 'page_id' });
 db.page.hasMany(db.mention_tone,{foreignKey: 'page_id' });
 //db.mention_tone.belongsTo(db.mention_tone);
+
+db.user.belongsToMany(db.group, {through: db.group_member,foreignKey: 'user_id' });
+db.group.belongsToMany(db.user, {through: db.group_member,foreignKey: 'group_id'});
 
 module.exports = db;  
