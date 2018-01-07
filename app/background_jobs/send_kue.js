@@ -3,7 +3,7 @@ const kue = require('kue');
 const queue = kue.createQueue({redis:process.env.REDIS_URL});
 
 function sendMailToQueue(userDetails){
-    let link = `${process.env.HOST}/api/v1/auth/verify/?id=${userDetails.id}`;
+    let link = `${process.env.HOST}api/v1/auth/verify/?id=${userDetails.id}`;
     let job = queue.create('email', {
         verify_link: link,
         body: `It's a pleasure to meet you ${userDetails.first_name} ${userDetails.last_name}, \n 
