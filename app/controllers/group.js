@@ -112,7 +112,7 @@ function getUserGroups(req,res){
     req.user.getGroups()
     .then((groups)=>{
         let formatted_groups = groups.map((group)=>{
-                        return {name:group.name,type:group.type,description:group.description,categories:group.categories}
+                        return {id:group.id,name:group.name,type:group.type,description:group.description,categories:group.categories}
                         })
         res.status(200).json(formatted_groups)
     })
