@@ -16,6 +16,14 @@ router.route('/account/info').get(passport.authenticate(),UserController.getAcco
 router.route('/group').post(passport.authenticate(),GroupController.addGroup);
 router.route('/groups/').get(passport.authenticate(),GroupController.getUserGroups);
 router.route('/group/:id').get(passport.authenticate(),GroupController.findGroup);
+router.route('/group/:id').delete(passport.authenticate(),GroupController.deleteGroup);
+router.route('/group/:group_id/invite/user/:user_id').post(passport.authenticate(),GroupController.inviteGroupMember);
+//only a get request for testing purposes
+router.route('/group/:group_id/invite/user/:user_id').get(passport.authenticate(),GroupController.inviteGroupMember);
+
+
+//Search User
+router.route('/search').get(passport.authenticate(),UserController.findByEmail);
 
 //User Subscriptions
 router.route('/subscriptions').get(passport.authenticate(),SubscriptionController.getSubscription);

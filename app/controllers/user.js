@@ -42,6 +42,21 @@ function find(req,res){
     });
 }
 
+function findByEmail(req,res){
+    models.user.find({where:{email:req.query.email}})
+    .then((user)=>{
+        if (user != null){
+            res.status(200).json({user:user.id})
+        }
+        else{
+            res.status(200).json({message: `${req.query.email} does not exist`})
+        }
+    })
+    .catch((error)=>{
+        res.status(400).json({message:error})
+    })
+}
+
 function update(req,res){
     res.status(200).json('I dont do nothing yet..Soon tho');
 }
@@ -73,5 +88,6 @@ module.exports = {
    find:find,
    update:update,
    destroy:destroy,
-   getAccountInfo:getAccountInfo
+   getAccountInfo:getAccountInfo,
+   findByEmail:findByEmail
 }

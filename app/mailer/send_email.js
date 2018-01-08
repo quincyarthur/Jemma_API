@@ -2,7 +2,6 @@ const kue = require('kue');
 const queue = kue.createQueue({redis:process.env.REDIS_URL});
 const helper = require('sendgrid').mail;
 const sg = require('sendgrid')(process.env.SENDGRID_API_KEY);
-
 queue.process('email',(job,done) => {  
     let mailOptions = {
         from: 'quincyarthur@gmail.com',

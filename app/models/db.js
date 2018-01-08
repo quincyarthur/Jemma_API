@@ -64,9 +64,9 @@ db.account_type.hasMany(db.user_account,{foreignKey: 'account_type_id' });
 //db.page.hasMany(db.account_page,{foreignKey: 'page_id' });
 //db.account_page.belongsTo(db.page);
 db.user_account.belongsToMany(db.page, {through: db.account_page,foreignKey: 'user_account_id' });
-db.user.hasOne(db.group,{foreignKey: 'user_id' });
+db.user.hasOne(db.group,{foreignKey: 'user_id',onDelete:'cascade',hooks:true });
 db.page.belongsToMany(db.user_account, {through: db.account_page,foreignKey: 'page_id'});
-db.group.hasOne(db.page,{foreignKey: 'group_id' });
+db.group.hasOne(db.page,{foreignKey: 'group_id', onDelete:'cascade',hooks:true});
 //db.page.belongsTo(db.group);
 db.user.hasMany(db.preference,{foreignKey: 'user_id' });
 //db.preference.belongsTo(db.user);
@@ -92,7 +92,7 @@ db.page.hasMany(db.keyword_sentiment,{foreignKey: 'page_id' });
 db.page.hasMany(db.mention_tone,{foreignKey: 'page_id' });
 //db.mention_tone.belongsTo(db.mention_tone);
 
-db.user.belongsToMany(db.group, {through: db.group_member,foreignKey: 'user_id' });
-db.group.belongsToMany(db.user, {through: db.group_member,foreignKey: 'group_id'});
+db.user.belongsToMany(db.group, {through: db.group_member,foreignKey: 'user_id',onDelete:'cascade',hooks:true });
+db.group.belongsToMany(db.user, {through: db.group_member,foreignKey: 'group_id',onDelete:'cascade',hooks:true});
 
 module.exports = db;  

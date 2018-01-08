@@ -21,6 +21,25 @@ function sendMailToQueue(userDetails){
       });
 }
 
+function sendGroupMemberInvite(groupDetails){
+  let link = `${process.env.HOST}api/v1/group/member/?user_id=${groupDetails[0].id}&group_id=${groupDetails[1].id}`;
+  let job = queue.create('email', {
+      verify_link: link,
+      body: `Hey ${groupDetails[0].first_name} you've been invited to join the group ${groupDetails[1].name}, \n 
+             Accept the invitation by clicking the following link: \n ${link}`,
+      to: groupDetails[0].email,
+      first_name: groupDetails[0].first_name,
+      last_name: groupDetails[0].last_name,
+    }).attempts(5).ttl(300000).removeOnComplete(true).save(function(err){ //ttl(milliseconds) kills job if a worker doesnt handle it in 5 minutes
+      if(!err) {
+        console.log(`Sending job to Mail Queue`);
+      }
+      else{
+        console.log(`Error sending job to Mail Queue`);
+      }
+    });
+}
+
 function sendUserAccountToQueue(user_id){
     let job = queue.create('update_user_accounts',{
         user: user_id
@@ -36,5 +55,6 @@ function sendUserAccountToQueue(user_id){
 
 module.exports = {
     sendMailToQueue:sendMailToQueue,
-    sendUserAccountToQueue: sendUserAccountToQueue
+    sendUserAccountToQueue:sendUserAccountToQueue,
+    sendGroupMemberInvite:sendGroupMemberInvite
 }
