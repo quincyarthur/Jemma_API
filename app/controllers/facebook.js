@@ -16,51 +16,70 @@ function getPosts(req,res){
 }
 
 function getPageInfo(req,res){
-    req.user.getUser_Accounts({account_id:req.params.account_id})
+    req.user.getUser_Accounts({account_type_id:2})
     .then((facebook_account)=>{
-            //equivalent of 'me/accounts' ensures user only sees pages they continue to admin
-            facebook.get_extended_page_access_token(facebook_account[0].token_key)
-            .then((authorized_pages)=>{
-                facebook_account[0].getPages({where:{managed_page_id:req.params.page_id}})
-                .then((page)=>{
-                    let user_page = page.filter((page)=>{return authorized_pages.map((auth)=>{return auth.id}).indexOf(page.managed_page_id) >= 0 });
-                    return user_page;
-                })
-                .then((user_page)=>{
-                    if (user_page.length > 0){
-                        return Promise.all(user_page.map((page)=>{
-                            return facebook.get_page_info(facebook_account[0].token_key,page.managed_page_id);
+        return Promise.all(facebook_account.map((account)=>{
+            return new Promise((resolve,reject)=>{
+                //equivalent of 'me/accounts' ensures user only sees pages they continue to admin
+                facebook.get_extended_page_access_token(account.token_key)
+                .then((authorized_pages)=>{
+                    account.getPages({where:{group_id:req.params.group_id}})
+                    .then((page)=>{
+                        if(page.length > 0 ){
+                            let user_page = page.filter((page)=>{return authorized_pages.map((auth)=>{return auth.id}).indexOf(page.managed_page_id) >= 0 });
+                            return user_page;
+                        }
+                        else{
+                            return Promise.reject("User is not a memeber of group specified");
+                        }  
+                    })
+                    .then((user_page)=>{
+                        if (user_page.length > 0){
+                            return Promise.all(user_page.map((page)=>{
+                                return facebook.get_page_info(account.token_key,page.managed_page_id);
+                            }))
+                        }
+                        else{
+                            return Promise.reject("User is no longer authorized to manage page");
+                        }
+                    })
+                    .then((page_info)=>{
+                        let page = Promise.all(page_info.map((page)=>{
+                            return facebook.get_page_posts(account.token_key,page.id)
+                            .then((posts)=>{
+                                let user_posts = posts.filter((post)=> {return 'message' in post})
+                                return {name:page.name,num_fans:page.fan_count,picture:page.picture.data.url,posts:user_posts}
+                            })
+                            .catch((error)=>{
+                                console.log(error);
+                            })
                         }))
-                    }
-                    else{
-                        return Promise.reject("User is no longer authorized to manage page");
-                    }
-                })
-                .then((page_info)=>{
-                    let page = Promise.all(page_info.map((page)=>{
-                        return facebook.get_page_posts(facebook_account[0].token_key,page.id)
-                        .then((posts)=>{
-                            let user_posts = posts.filter((post)=> {return 'message' in post})
-                            return {name:page.name,num_fans:page.fan_count,picture:page.picture.data.url,posts:user_posts}
-                        })
-                        .catch((error)=>{
-                            console.log(error);
-                        })
-                    }))
-                 return page;
-                })
-                .then((page_details)=>{
-                    res.status(200).json(page_details);
+                        return page;
+                    })
+                    .then((page_details)=>{
+                        resolve(page_details);//return //res.status(200).json(page_details);
+                    })
+                    .catch((error)=>{
+                        console.log(error)
+                        reject(error)//return Promise.reject(error);
+                    })
                 })
                 .catch((error)=>{
-                    console.log(error)
-                    return Promise.reject(error);
-                })
+                    //res.status(400).json({message:error});
+                   // console.log(error)
+                   return Promise.reject(error)
+                }) 
             })
-            .catch((error)=>{
-                res.status(400).json({message:error});
-                console.log(error)
-            })                  
+            
+        }))      
+    })
+    .then((page_posts)=>{
+        let flattened = [].concat.apply([],page_posts);
+        res.status(200).json(flattened);
+    })
+    .catch((error)=>{
+        console.log(error)
+        res.status(400).json({message:error});
     })
 }
 
@@ -199,37 +218,45 @@ function getMentionSentiments(req,res){
 }
 
 function addAccount(req,res){
-    return Promise.all([models.account_type.findOne({where:{description:'Facebook'}}),
-                        facebook.extend_user_access_token(req.body.temp_user_access_token),
-                        models.user_account.findOne({where:{account_id:req.params.account_id}})
-                       ])
+    models.user_account.findOne({where:{account_id:req.params.account_id}})
+    .then((user_account)=>{
+        if (user_account){
+            return Promise.all([models.account_type.findOne({where:{description:'Facebook'}}),user_account.token_key]);
+        }
+        else{
+            return Promise.all([models.account_type.findOne({where:{description:'Facebook'}}),
+                                facebook.extend_user_access_token(req.body.temp_user_access_token),
+                              ])
+        }
+    })
     .then((results)=>{
-        if (!results[2]){
-            let arr_pages = req.body.pages.split(',');
-            return Promise.all([req.user.createUser_Account({
-                                            account_id: req.params.account_id,
-                                            token_key:results[1],
-                                            account_type_id:results[0].id}),
-                                Promise.all(arr_pages.map((page)=>{
-                                    return new Promise((resolve,reject)=>{
+            return Promise.all([new Promise((resolve,reject)=>{
+                                            models.user_account.findOrCreate({
+                                                where:{account_id:req.params.account_id},
+                                                defaults:{
+                                                    account_id: req.params.account_id,
+                                                    token_key:results[1],
+                                                    account_type_id:results[0].id
+                                                }
+                                            })
+                                            .spread((user_account,created)=>{
+                                                resolve(user_account);
+                                            })
+                                        }),
+                                    new Promise((resolve,reject)=>{
                                         models.page.findOrCreate({
-                                            where:{managed_page_id:page},
+                                            where:{managed_page_id:req.params.page_id},
                                             defaults:{
                                                 group_id: req.params.group_id,
-                                                managed_page_id:page,
+                                                managed_page_id:req.params.page_id,
                                                 keywords: []
                                             }
                                         })
                                         .spread((page,created)=>{
                                             resolve(page);
                                         })
-                                    }) 
-                                }))           
-                            ])
-        }
-        else{
-            return Promise.reject('Account already tied to user')
-        }     
+                                    })          
+                            ])   
     })
     .then((accounts)=>{
         let flattened = [].concat.apply([],accounts);
@@ -250,7 +277,7 @@ function addPages(req,res){
             return reject("No Pages Specified");
          }
          else{
-            let arr_pages = req.body.pages.split(',');
+            let arr_pages = req.body.pages;
             return resolve(arr_pages);
          }
     });

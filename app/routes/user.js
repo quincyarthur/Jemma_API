@@ -18,6 +18,7 @@ router.route('/groups/').get(passport.authenticate(),GroupController.getUserGrou
 router.route('/group/:id').get(passport.authenticate(),GroupController.findGroup);
 router.route('/group/:id').delete(passport.authenticate(),GroupController.deleteGroup);
 router.route('/group/:group_id/invite/user/:user_id').post(passport.authenticate(),GroupController.inviteGroupMember);
+router.route('/group/:group_id/user/:user_id').delete(passport.authenticate(),GroupController.removeGroupMember);
 //only a get request for testing purposes
 router.route('/group/:group_id/invite/user/:user_id').get(passport.authenticate(),GroupController.inviteGroupMember);
 
@@ -36,8 +37,9 @@ router.route('/twitter/page/:page_id/customer/sentiments').post(passport.authent
 router.route('/twitter/page/:page_id/customer/tones').post(passport.authenticate(),TwitterController.getMentionTones)
 
 //User Facebook Account
-router.route('/group/:group_id/account/:account_id/facebook').post(passport.authenticate(),FacebookController.addAccount);
-router.route('/facebook/account/:account_id/page/:page_id/info').get(passport.authenticate(),FacebookController.getPageInfo)
+router.route('/group/:group_id/account/:account_id/page/:page_id/facebook').post(passport.authenticate(),FacebookController.addAccount);
+router.route('/group/:group_id/facebook/posts').get(passport.authenticate(),FacebookController.getPageInfo)
+//router.route('/facebook/account/:account_id/page/:page_id/info').get(passport.authenticate(),FacebookController.getPageInfo)
 router.route('/facebook/page/:page_id/post/:post_id/sentiments').get(passport.authenticate(),FacebookController.getPostSentiment)
 router.route('/facebook/page/:page_id/sentiments').get(passport.authenticate(),FacebookController.getAllPostSentiment)
 router.route('/facebook/post/:post_id/tones').get(passport.authenticate(),FacebookController.getPostTones)

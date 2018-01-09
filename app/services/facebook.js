@@ -21,6 +21,21 @@ class Facebook{
                 });
             })   
         };
+        this.verify_user_access_token = (user_access_token)=>{
+            return new Promise((resolve,reject)=>{
+                FB.api('/debug_token',{input_token:user_access_token,
+                                       access_token:process.env.FACEBOOK_APP_TOKEN
+                    },(res)=>{
+                    if(!res || res.error) {
+                        console.log(!res ? 'error occurred' : res.error);
+                        return reject(res.error);
+                    }
+                    console.log(`Debug Response ${JSON.stringify(res,null,2)}`)
+                    return resolve(res.data.is_valid);
+                    
+                })
+            })
+        }
         this.get_extended_page_access_token = (extended_user_access_token)=>{
             return new Promise((resolve,reject)=>{
                 FB.api('me/accounts',{access_token:extended_user_access_token},(res)=>{

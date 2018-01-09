@@ -1,3 +1,4 @@
+/*
 'use strict';
 module.exports = {
   up: function (queryInterface, Sequelize) {
@@ -17,6 +18,6 @@ module.exports = {
 
       Example:
       return queryInterface.bulkDelete('Person', null, {});
-    */
+    
   }
-};
+};*/

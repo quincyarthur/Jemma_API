@@ -97,10 +97,39 @@ function addGroupMember(req,res){
     return Promise.all([models.user.findById(req.query.user_id),
                        models.group.findById(req.query.group_id)])
     .then((results)=>{
-        results[0].addGroups(results[1])
+        if(results[1]){
+           results[0].addGroups(results[1])
+        }
+        else{
+            return Promise.reject("Group no longer exists");
+        }    
     })
     .then((group_member)=>{
         res.status(200).json({message:"User successfully added to group"})
+    })
+    .catch((error)=>{
+        console.log(error)
+        res.status(400).json({message:error})
+    })
+}
+
+function removeGroupMember(req,res){
+    req.user.getGroups({where:{id:req.params.group_id}})
+    .then((group_owner)=>{
+        if(group_owner){
+            return  models.group_member.find({where:{user_id:req.params.user_id,group_id:req.params.group_id}})
+        }
+        else{
+            //res.status(200).json({message:"User is not the owner of group requested"});
+            return Promise.reject("User is not the owner of group requested");
+        }
+    })
+    .then((results)=>{
+        console.log(JSON.stringify(results,null,2))
+        results.destroy
+    })
+    .then((deleted)=>{
+        res.status(200).json({message:"User successfully removed from group"})
     })
     .catch((error)=>{
         console.log(error)
@@ -128,5 +157,6 @@ module.exports = {
     deleteGroup:deleteGroup,
     getUserGroups,getUserGroups,
     inviteGroupMember:inviteGroupMember,
-    addGroupMember:addGroupMember
+    addGroupMember:addGroupMember,
+    removeGroupMember:removeGroupMember
 }
