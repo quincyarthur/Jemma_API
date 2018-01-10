@@ -234,6 +234,7 @@ function addAccount(req,res){
                                             models.user_account.findOrCreate({
                                                 where:{account_id:req.params.account_id},
                                                 defaults:{
+                                                    user_id: req.user.id,
                                                     account_id: req.params.account_id,
                                                     token_key:results[1],
                                                     account_type_id:results[0].id
