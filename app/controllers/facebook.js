@@ -30,8 +30,7 @@ function getPageInfo(req,res){
                             return user_page;
                         }
                         else{
-                            resolve([]);
-                            //return Promise.reject("User is not a memeber of group specified");
+                            return Promise.reject([]);
                         }  
                     })
                     .then((user_page)=>{
