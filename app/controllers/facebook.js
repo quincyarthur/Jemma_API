@@ -79,7 +79,13 @@ function getPageInfo(req,res){
     })
     .catch((error)=>{
         console.log(error)
-        res.status(400).json({message:error});
+        if(Array.isArray(error)){
+            res.status(200).json(error);
+        }
+        else{
+            res.status(400).json({message:error});
+        }
+        
     })
 }
 
